@@ -37,7 +37,7 @@ class Apisunat {
 	 * @access   protected
 	 * @var      Apisunat_Loader    $loader    Maintains and registers all hooks for the plugin.
 	 */
-	protected $loader;
+	protected Apisunat_Loader $loader;
 
 	/**
 	 * The unique identifier of this plugin.
@@ -46,7 +46,7 @@ class Apisunat {
 	 * @access   protected
 	 * @var      string    $plugin_name    The string used to uniquely identify this plugin.
 	 */
-	protected $plugin_name;
+	protected string $plugin_name;
 
 	/**
 	 * The current version of the plugin.
@@ -55,7 +55,7 @@ class Apisunat {
 	 * @access   protected
 	 * @var      string    $version    The current version of the plugin.
 	 */
-	protected $version;
+	protected string $version;
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -97,7 +97,8 @@ class Apisunat {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function load_dependencies() {
+	private function load_dependencies(): void
+    {
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
@@ -135,7 +136,8 @@ class Apisunat {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function set_locale() {
+	private function set_locale(): void
+    {
 
 		$plugin_i18n = new Apisunat_i18n();
 
@@ -150,7 +152,8 @@ class Apisunat {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_admin_hooks() {
+	private function define_admin_hooks(): void
+    {
 
 		$plugin_admin = new Apisunat_Admin( $this->get_plugin_name(), $this->get_version() );
 
@@ -167,7 +170,8 @@ class Apisunat {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_public_hooks() {
+	private function define_public_hooks(): void
+    {
 
 		$plugin_public = new Apisunat_Public( $this->get_plugin_name(), $this->get_version() );
 
@@ -181,7 +185,8 @@ class Apisunat {
 	 *
 	 * @since    1.0.0
 	 */
-	public function run() {
+	public function run(): void
+    {
 		$this->loader->run();
 	}
 
@@ -192,7 +197,8 @@ class Apisunat {
 	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
 	 */
-	public function get_plugin_name() {
+	public function get_plugin_name(): string
+    {
 		return $this->plugin_name;
 	}
 
@@ -202,7 +208,8 @@ class Apisunat {
 	 * @since     1.0.0
 	 * @return    Apisunat_Loader    Orchestrates the hooks of the plugin.
 	 */
-	public function get_loader() {
+	public function get_loader(): Apisunat_Loader
+    {
 		return $this->loader;
 	}
 
@@ -212,7 +219,8 @@ class Apisunat {
 	 * @since     1.0.0
 	 * @return    string    The version number of the plugin.
 	 */
-	public function get_version() {
+	public function get_version(): string
+    {
 		return $this->version;
 	}
 

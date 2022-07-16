@@ -23,13 +23,12 @@
 class Apisunat_Uninstaller {
 
 	/**
-	 * Short Description. (use period)
-	 *
-	 * Long Description.
+	 * Unninstall plugin.
 	 *
 	 * @since    1.0.0
 	 */
-	public static function uninstall() {
+	public static function uninstall(): void
+    {
 
         delete_option('apisunat_ruc');
         delete_option('apisunat_personal_id');
