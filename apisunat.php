@@ -49,13 +49,14 @@ HTML;
 /**
  * Currently plugin version.
  */
-define( 'APISUNAT_VERSION', '1.0.6' );
+const APISUNAT_VERSION = '1.0.6';
 
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-apisunat-activator.php
  */
-function activate_apisunat() {
+function activate_apisunat(): void
+{
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-apisunat-activator.php';
 	Apisunat_Activator::activate();
 }
@@ -64,7 +65,8 @@ function activate_apisunat() {
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-apisunat-deactivator.php
  */
-function deactivate_apisunat() {
+function deactivate_apisunat(): void
+{
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-apisunat-deactivator.php';
 	Apisunat_Deactivator::deactivate();
 }
@@ -73,7 +75,8 @@ function deactivate_apisunat() {
  * The code that runs during plugin uninstall.
  * This action is documented in includes/class-apisunat-uninstaller.php
  */
-function uninstall_apisunat() {
+function uninstall_apisunat(): void
+{
     require_once plugin_dir_path( __FILE__ ) . 'includes/class-apisunat-uninstaller.php';
     Apisunat_Uninstaller::uninstall();
 }
@@ -97,7 +100,8 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-apisunat.php';
  *
  * @since    1.0.0
  */
-function run_apisunat() {
+function run_apisunat(): void
+{
 
 	$plugin = new Apisunat();
 	$plugin->run();

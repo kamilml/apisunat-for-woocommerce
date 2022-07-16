@@ -32,7 +32,7 @@ class Apisunat_Admin
      * @access   private
      * @var      string $plugin_name The ID of this plugin.
      */
-    private $plugin_name;
+    private string $plugin_name;
 
     /**
      * The version of this plugin.
@@ -41,7 +41,7 @@ class Apisunat_Admin
      * @access   private
      * @var      string $version The current version of this plugin.
      */
-    private $version;
+    private string $version;
 
     /**
      * Initialize the class and set its properties.
@@ -50,7 +50,7 @@ class Apisunat_Admin
      * @param string $version The version of this plugin.
      * @since    1.0.0
      */
-    public function __construct($plugin_name, $version)
+    public function __construct(string $plugin_name, string $version)
     {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
@@ -66,6 +66,13 @@ class Apisunat_Admin
 
     }
 
+    /**
+     * Add APISUNAT status Column
+     *
+     * @param $columns
+     * @return array
+     * @since    1.0.0
+     */
     function apisunat_custom_order_column($columns): array
     {
         $reordered_columns = array();
@@ -79,7 +86,15 @@ class Apisunat_Admin
         return $reordered_columns;
     }
 
-    function apisunat_custom_orders_list_column_content($column, $post_id)
+    /**
+     * Print APISUNAT bill status in order list column
+     *
+     * @param $column
+     * @param $post_id
+     * @return void
+     * @since    1.0.0
+     */
+    function apisunat_custom_orders_list_column_content($column, $post_id): void
     {
         if ('apisunat_document_status' == $column) {
             $status = get_post_meta($post_id, 'apisunat_document_status', true);
@@ -91,7 +106,12 @@ class Apisunat_Admin
         }
     }
 
-    public function apisunat_check_status_on_schedule()
+    /**
+     * Change APISUNAT status cron schedule function
+     * @return void
+     * @since    1.0.0
+     */
+    public function apisunat_check_status_on_schedule(): void
     {
 
         $orders = wc_get_orders(array(
@@ -117,19 +137,26 @@ class Apisunat_Admin
     }
 
     /**
+     * Send bill event trigger depend on manual or automatic config
      * @return void
+     * @since    1.0.0
      */
     public function apisunat_forma_envio_facturas(): void
     {
         if (get_option('apisunat_forma_envio') == 'auto') {
             add_action('woocommerce_order_status_completed', array($this, 'send_apisunat_order'), 10, 1);
-            add_action('wp_ajax_send_apisunat_order', array($this, 'send_apisunat_order'), 10, 1);
-        } else {
-            add_action('wp_ajax_send_apisunat_order', array($this, 'send_apisunat_order'), 10, 1);
         }
+        add_action('wp_ajax_send_apisunat_order', array($this, 'send_apisunat_order'), 10, 1);
     }
 
-    function send_apisunat_order($order_id)
+    /**
+     * Prepare payload and send info to APISUNAT API
+     *
+     * @param $order_id
+     * @return void
+     * @since    1.0.0
+     */
+    function send_apisunat_order($order_id): void
     {
 
         $orderId = isset($_POST['order_value']) ? intval($_POST['order_value']) : $order_id;
@@ -158,7 +185,6 @@ class Apisunat_Admin
         $send_data['plugin_data']['shipping_cost'] = get_option('apisunat_shipping_cost');
         $send_data['plugin_data']['debug'] = get_option('apisunat_debug_mode');
         $send_data['plugin_data']['custom_meta_data'] = get_option('apisunat_custom_checkout');
-
 
 
         $send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_document_type'] = [
@@ -220,7 +246,13 @@ class Apisunat_Admin
         $order->add_order_note($msg);
     }
 
-    function void_apisunat_order()
+    /**
+     * Void APISUNAT bill
+     *
+     * @return void
+     * @since    1.0.0
+     */
+    function void_apisunat_order(): void
     {
         $order_id = intval($_POST['order_value']);
 
@@ -258,73 +290,37 @@ class Apisunat_Admin
     }
 
     /**
-     * Obtener el ultimo documento según el tipo
+     * Add APISUNAT meta box
+     *
+     * @return void
+     * @since    1.0.0
      */
-    public function apisunat_get_last_document($document_type)
-    {
-        $serie = "";
-        switch ($document_type) {
-            case '01':
-                $serie = get_option('apisunat_serie_factura');
-                break;
-            case '03':
-                $serie = get_option('apisunat_serie_boleta');
-                break;
-        }
-
-        $query_vars = array(
-            'personaId' => get_option('apisunat_personal_id', ''),
-            'personaToken' => get_option('apisunat_personal_token', ''),
-            'order' => 'DESC',
-            'limit' => '1',
-            'type' => $document_type,
-            'serie' => $serie
-        );
-
-        $args = array('timeout' => 45);
-        $request = wp_remote_get(self::API_URL . '/documents/getAll?' . http_build_query($query_vars), $args);
-
-        $data = json_decode(wp_remote_retrieve_body($request), true);
-        $filename = $data[0]['fileName'];
-        $serie_correlative = $this->apisunat_extract_serie_get_correlative($filename);
-        $data['extra'] = $serie_correlative;
-
-        return $data;
-    }
-
-    /*
-     * Get serie and calculate consecutive from the last document filename
-     */
-    function apisunat_extract_serie_get_correlative($filename): array
-    {
-        $temp = explode('-', $filename); //split filename by '-' character
-        $data = array();
-        $data['serie'] = $temp[2];
-        $number = $temp[3];
-        $number = str_pad(intval($number) + 1, strlen($number), '0', STR_PAD_LEFT); //increase string number
-        $data['correlative'] = $number;
-
-        return $data;
-    }
-
-    function apisunat_meta_boxes()
+    function apisunat_meta_boxes(): void
     {
         add_meta_box(
             'woocommerce-order-apisunat',
             __('APISUNAT'),
             array($this, 'order_meta_box_apisunat'),
             'shop_order',
-            'side',
-            'default'
+            'side'
         );
     }
 
-    function order_meta_box_apisunat($order_id)
+    /**
+     * Add APISUNAT meta box data
+     *
+     * @param $order_id
+     * @return void
+     * @since    1.0.0
+     */
+    function order_meta_box_apisunat($order_id): void
     {
         $order = wc_get_order($order_id);
         if ($order->meta_exists('apisunat_document_status')) {
             {
                 $option_name = get_option('apisunat_key_tipo_comprobante');
+
+                $tipo = '';
 
                 switch ($order->get_meta($option_name)) {
                     case '01':
@@ -366,7 +362,7 @@ class Apisunat_Admin
 
                 echo '<a id="apisunatSendData" class="button-primary">Enviar Comprobante</a> ';
                 echo '<div id="apisunatLoading" class="mt-3 mx-auto" style="display:none;">
-                        <img src="images/loading.gif"/>
+                        <img src="images/loading.gif" alt="loading"/>
                     </div>';
             }
 
@@ -379,7 +375,7 @@ class Apisunat_Admin
 
                 echo '<a id="apisunatSendData" class="button-primary">Enviar Comprobante</a> ';
                 echo '<div id="apisunatLoading" class="mt-3 mx-auto" style="display:none;">
-                        <img src="images/loading.gif"/>
+                        <img src="images/loading.gif" alt="loading"/>
                     </div>';
             }
 
@@ -401,32 +397,13 @@ class Apisunat_Admin
 
     }
 
-    public function add_apisunat_document_modal()
-    {
-        /**
-         * Initialize the class and set its properties.
-         */
-        function apisunat_pop_up()
-        { ?>
-            <div id="apisunatModal" class="apisunat-modal">
-                <!-- Modal content -->
-                <div class="apisunatmodal-content">
-                    <span class="apisunatmodal-close" id="apisunatModalClose">&times;</span>
-                    <div class="apisunatmodal-modal-header">
-                        <h4 class="apisunatmodal-modal-title">Document</h4>
-                    </div>
-                </div>
-            </div>
-            <?php
-        }
-
-        add_action('edit_form_advanced', 'apisunat_pop_up');
-    }
-
     /**
-     * Agregar la entrada para la pagina de configuraciones
+     * APISUNAT menu inside Woocomerce menu
+     *
+     * @return void
+     * @since    1.0.0
      */
-    public function add_apisunat_admin_menu()
+    public function add_apisunat_admin_menu(): void
     {
         add_submenu_page(
             'woocommerce',
@@ -441,16 +418,22 @@ class Apisunat_Admin
 
     /**
      * Display settings
+     *
+     * @return void
+     * @since    1.0.0
      */
-    public function display_apisunat_admin_settings()
+    public function display_apisunat_admin_settings(): void
     {
         require_once 'partials/' . $this->plugin_name . '-admin-display.php';
     }
 
     /**
-     * Fields
+     * Declare sections Fields
+     *
+     * @return void
+     * @since    1.0.0
      */
-    public function register_and_build_fields()
+    public function register_and_build_fields(): void
     {
         /**
          * First, we add_settings_section. This is necessary since all future settings must belong to one.
@@ -751,22 +734,27 @@ class Apisunat_Admin
     }
 
     /**
-     * Message
+     * General settings Header
+     *
+     * @return void
+     * @since    1.0.0
      */
-    public function apisunat_display_general_account()
+    public function apisunat_display_general_account(): void
     {
         ?>
         <h4>Asegúrate de susbscribirte a <a href="https://apisunat.com/" target="_blank">APISUNAT</a> y obtener los
-            datos
-            de acceso</h4>
+            datos de acceso</h4>
         <hr>
         <?php
     }
 
     /**
-     * Message
+     * Message user settings section
+     *
+     * @return void
+     * @since    1.0.0
      */
-    public function apisunat_display_data()
+    public function apisunat_display_data(): void
     {
         ?>
         <h3>Configuración para envio de datos</h3>
@@ -775,9 +763,12 @@ class Apisunat_Admin
     }
 
     /**
-     * Message
+     * Advanced settings Header
+     *
+     * @return void
+     * @since    1.0.0
      */
-    public function apisunat_display_advanced()
+    public function apisunat_display_advanced(): void
     {
         ?>
         <h3>Configuración avanzada</h3>
@@ -785,13 +776,14 @@ class Apisunat_Admin
         <?php
     }
 
-
     /**
-     * Complete
+     * Render html settings fields
      *
      * @param array $args Array or args.
+     * @return void
+     * @since    1.0.0
      */
-    public function apisunat_render_settings_field($args)
+    public function apisunat_render_settings_field(array $args): void
     {
         $required_attr = $args['required'] ? "required" : "";
         $pattern_attr = isset($args['pattern']) ? "pattern=" . $args['pattern'] : "";
@@ -831,21 +823,9 @@ class Apisunat_Admin
      *
      * @since    1.0.0
      */
-    public function enqueue_styles()
+    public function enqueue_styles(): void
     {
-        /**
-         * This function is provided for demonstration purposes only.
-         *
-         * An instance of this class should be passed to the run() function
-         * defined in Apisunat_Loader as all of the hooks are defined
-         * in that particular class.
-         *
-         * The Apisunat_Loader will then create the relationship
-         * between the defined hooks and the functions defined in this
-         * class.
-         */
-
-        wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/apisunat-admin.css', array(), $this->version, 'all');
+        wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/apisunat-admin.css', array(), $this->version);
     }
 
     /**
@@ -853,21 +833,9 @@ class Apisunat_Admin
      *
      * @since    1.0.0
      */
-    public function enqueue_scripts($order_id)
+    public function enqueue_scripts(): void
     {
-
-        /**
-         * This function is provided for demonstration purposes only.
-         *
-         * An instance of this class should be passed to the run() function
-         * defined in Apisunat_Loader as all of the hooks are defined
-         * in that particular class.
-         *
-         * The Apisunat_Loader will then create the relationship
-         * between the defined hooks and the functions defined in this
-         * class.
-         */
-        wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/apisunat-admin.js', array('jquery'), $this->version, false);
+        wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/apisunat-admin.js', array('jquery'), $this->version);
         wp_localize_script($this->plugin_name, 'apisunat_ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
     }
 

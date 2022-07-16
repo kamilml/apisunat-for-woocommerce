@@ -29,7 +29,7 @@ class Apisunat_Public
      * @access   private
      * @var      string $plugin_name The ID of this plugin.
      */
-    private $plugin_name;
+    private string $plugin_name;
 
     /**
      * The version of this plugin.
@@ -38,7 +38,7 @@ class Apisunat_Public
      * @access   private
      * @var      string $version The current version of this plugin.
      */
-    private $version;
+    private string $version;
 
     /**
      * Initialize the class and set its properties.
@@ -47,13 +47,10 @@ class Apisunat_Public
      * @param string $version The version of this plugin.
      * @since    1.0.0
      */
-    public function __construct($plugin_name, $version)
+    public function __construct(string $plugin_name, string $version)
     {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
-
-//        add_action('wp_ajax_change_fields', array($this, 'change_fields'));
-//        add_action('wp_ajax_nopriv_change_fields', array($this, 'change_fields'));
 
         if (get_option('apisunat_custom_checkout') == "false") {
 
@@ -64,7 +61,15 @@ class Apisunat_Public
     }
 
 
-    function apisunat_custom_fields_validate($data, $errors)
+    /**
+     * Validate checkout custom fields
+     *
+     * @param $data
+     * @param $errors
+     * @return void
+     * @since 1.0.0
+     */
+    function apisunat_custom_fields_validate($data, $errors): void
     {
 
         if (isset($_POST['billing_apisunat_customer_id_type'])) {
@@ -106,9 +111,15 @@ class Apisunat_Public
 
     }
 
+    /**
+     * Declare checkout custom fields
+     *
+     * @param $fields
+     * @return array
+     * @since 1.0.0
+     */
     function custom_woocommerce_billing_fields($fields): array
     {
-//        $fields['billing_company']['required'] = false;
         $fields['billing_first_name']['required'] = false;
         $fields['billing_last_name']['required'] = false;
 
@@ -151,43 +162,14 @@ class Apisunat_Public
         return $fields;
     }
 
-//    function change_fields()
-//    {
-//        $tipo = $_POST['tipo'];
-//
-//        if ($tipo == 'boleta') {
-//
-//            add_action('woocommerce_billing_fields', 'company_checkbox_and_new_checkout_fields_1');
-//
-//            function company_checkbox_and_new_checkout_fields_1($fields)
-//            {
-//                $fields['billing_company']['required'] = false;
-//                return $fields;
-//            }
-//        }
-//    }
-
-
     /**
      * Register the stylesheets for the public-facing side of the site.
      *
      * @since    1.0.0
      */
-    public function enqueue_styles()
+    public function enqueue_styles(): void
     {
-        /**
-         * This function is provided for demonstration purposes only.
-         *
-         * An instance of this class should be passed to the run() function
-         * defined in Apisunat_Loader as all of the hooks are defined
-         * in that particular class.
-         *
-         * The Apisunat_Loader will then create the relationship
-         * between the defined hooks and the functions defined in this
-         * class.
-         */
-
-        wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/apisunat-public.css', array(), $this->version, 'all');
+        wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/apisunat-public.css', array(), $this->version);
     }
 
     /**
@@ -195,20 +177,9 @@ class Apisunat_Public
      *
      * @since    1.0.0
      */
-    public function enqueue_scripts()
+    public function enqueue_scripts(): void
     {
-        /**
-         * This function is provided for demonstration purposes only.
-         *
-         * An instance of this class should be passed to the run() function
-         * defined in Apisunat_Loader as all of the hooks are defined
-         * in that particular class.
-         *
-         * The Apisunat_Loader will then create the relationship
-         * between the defined hooks and the functions defined in this
-         * class.
-         */
-        wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/apisunat-public.js', array('jquery'), $this->version, false);
+        wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/apisunat-public.js', array('jquery'), $this->version);
         wp_localize_script($this->plugin_name, 'admin_ajax_object', array('ajaxurl' => admin_url('admin-ajax.php')));
     }
 }
