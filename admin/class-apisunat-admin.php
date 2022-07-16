@@ -58,7 +58,6 @@ class Apisunat_Admin
         add_action('admin_menu', array($this, 'add_apisunat_admin_menu'), 10);
         add_action('admin_init', array($this, 'register_and_build_fields'));
         add_action('add_meta_boxes', array($this, 'apisunat_meta_boxes'));
-        add_action('admin_init', array($this, 'add_apisunat_document_modal'));
         add_action('admin_init', array($this, 'apisunat_forma_envio_facturas'));
         add_action('wp_ajax_void_apisunat_order', array($this, 'void_apisunat_order'), 11, 1);
         add_filter('manage_edit-shop_order_columns', array($this, 'apisunat_custom_order_column'), 11);
