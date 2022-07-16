@@ -70,8 +70,8 @@ class Apisunat_Admin
      * Add APISUNAT status Column
      *
      * @param $columns
-     * @since    1.0.0
      * @return array
+     * @since    1.0.0
      */
     function apisunat_custom_order_column($columns): array
     {
@@ -91,8 +91,8 @@ class Apisunat_Admin
      *
      * @param $column
      * @param $post_id
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     function apisunat_custom_orders_list_column_content($column, $post_id): void
     {
@@ -108,8 +108,8 @@ class Apisunat_Admin
 
     /**
      * Change APISUNAT status cron schedule function
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     public function apisunat_check_status_on_schedule(): void
     {
@@ -138,25 +138,23 @@ class Apisunat_Admin
 
     /**
      * Send bill event trigger depend on manual or automatic config
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     public function apisunat_forma_envio_facturas(): void
     {
         if (get_option('apisunat_forma_envio') == 'auto') {
             add_action('woocommerce_order_status_completed', array($this, 'send_apisunat_order'), 10, 1);
-            add_action('wp_ajax_send_apisunat_order', array($this, 'send_apisunat_order'), 10, 1);
-        } else {
-            add_action('wp_ajax_send_apisunat_order', array($this, 'send_apisunat_order'), 10, 1);
         }
+        add_action('wp_ajax_send_apisunat_order', array($this, 'send_apisunat_order'), 10, 1);
     }
 
     /**
      * Prepare payload and send info to APISUNAT API
      *
      * @param $order_id
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     function send_apisunat_order($order_id): void
     {
@@ -187,7 +185,6 @@ class Apisunat_Admin
         $send_data['plugin_data']['shipping_cost'] = get_option('apisunat_shipping_cost');
         $send_data['plugin_data']['debug'] = get_option('apisunat_debug_mode');
         $send_data['plugin_data']['custom_meta_data'] = get_option('apisunat_custom_checkout');
-
 
 
         $send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_document_type'] = [
@@ -252,8 +249,8 @@ class Apisunat_Admin
     /**
      * Void APISUNAT bill
      *
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     function void_apisunat_order(): void
     {
@@ -295,8 +292,8 @@ class Apisunat_Admin
     /**
      * Add APISUNAT meta box
      *
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     function apisunat_meta_boxes(): void
     {
@@ -305,8 +302,7 @@ class Apisunat_Admin
             __('APISUNAT'),
             array($this, 'order_meta_box_apisunat'),
             'shop_order',
-            'side',
-            'default'
+            'side'
         );
     }
 
@@ -323,6 +319,8 @@ class Apisunat_Admin
         if ($order->meta_exists('apisunat_document_status')) {
             {
                 $option_name = get_option('apisunat_key_tipo_comprobante');
+
+                $tipo = '';
 
                 switch ($order->get_meta($option_name)) {
                     case '01':
@@ -402,8 +400,8 @@ class Apisunat_Admin
     /**
      * APISUNAT menu inside Woocomerce menu
      *
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     public function add_apisunat_admin_menu(): void
     {
@@ -421,8 +419,8 @@ class Apisunat_Admin
     /**
      * Display settings
      *
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     public function display_apisunat_admin_settings(): void
     {
@@ -432,8 +430,8 @@ class Apisunat_Admin
     /**
      * Declare sections Fields
      *
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     public function register_and_build_fields(): void
     {
@@ -738,13 +736,14 @@ class Apisunat_Admin
     /**
      * General settings Header
      *
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     public function apisunat_display_general_account(): void
     {
         ?>
-        <h4>Asegúrate de susbscribirte a <a href="https://apisunat.com/" target="_blank">APISUNAT</a> y obtener los datos de acceso</h4>
+        <h4>Asegúrate de susbscribirte a <a href="https://apisunat.com/" target="_blank">APISUNAT</a> y obtener los
+            datos de acceso</h4>
         <hr>
         <?php
     }
@@ -752,8 +751,8 @@ class Apisunat_Admin
     /**
      * Message user settings section
      *
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     public function apisunat_display_data(): void
     {
@@ -766,8 +765,8 @@ class Apisunat_Admin
     /**
      * Advanced settings Header
      *
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
     public function apisunat_display_advanced(): void
     {
@@ -781,10 +780,10 @@ class Apisunat_Admin
      * Render html settings fields
      *
      * @param array $args Array or args.
-     * @since    1.0.0
      * @return void
+     * @since    1.0.0
      */
-    public function apisunat_render_settings_field($args): void
+    public function apisunat_render_settings_field(array $args): void
     {
         $required_attr = $args['required'] ? "required" : "";
         $pattern_attr = isset($args['pattern']) ? "pattern=" . $args['pattern'] : "";
@@ -826,7 +825,7 @@ class Apisunat_Admin
      */
     public function enqueue_styles(): void
     {
-        wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/apisunat-admin.css', array(), $this->version, 'all');
+        wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/apisunat-admin.css', array(), $this->version);
     }
 
     /**
@@ -834,9 +833,9 @@ class Apisunat_Admin
      *
      * @since    1.0.0
      */
-    public function enqueue_scripts($order_id): void
+    public function enqueue_scripts(): void
     {
-        wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/apisunat-admin.js', array('jquery'), $this->version, false);
+        wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/apisunat-admin.js', array('jquery'), $this->version);
         wp_localize_script($this->plugin_name, 'apisunat_ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
     }
 
