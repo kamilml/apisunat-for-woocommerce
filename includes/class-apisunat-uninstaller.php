@@ -1,25 +1,5 @@
 <?php
 
-/**
- * Fired during plugin uninstall
- *
- * @link       https://apisunat.com/
- * @since      1.0.0
- *
- * @package    Apisunat
- * @subpackage Apisunat/includes
- */
-
-/**
- * Fired during plugin deactivation.
- *
- * This class defines all code necessary to run during the plugin's uninstall.
- *
- * @since      1.0.0
- * @package    Apisunat
- * @subpackage Apisunat/includes
- * @author     Heikel Villar <heikelvillar@gmail.com>
- */
 class Apisunat_Uninstaller {
 
 	/**

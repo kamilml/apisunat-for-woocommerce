@@ -1,25 +1,5 @@
 <?php
 
-/**
- * The admin-specific functionality of the plugin.
- *
- * @link       https://apisunat.com/
- * @since      1.0.0
- *
- * @package    Apisunat
- * @subpackage Apisunat/admin
- */
-
-/**
- * The admin-specific functionality of the plugin.
- *
- * Defines the plugin name, version, and two examples hooks for how to
- * enqueue the admin-specific stylesheet and JavaScript.
- *
- * @package    Apisunat
- * @subpackage Apisunat/admin
- * @author     Heikel Villar <heikelvillar@gmail.com>
- */
 class Apisunat_Admin
 {
     const API_WC_URL = 'https://ecommerces-api.apisunat.com/v1.1/woocommerce';
@@ -340,10 +320,6 @@ class Apisunat_Admin
                         $order->get_meta('apisunat_document_id'), $order->get_meta('apisunat_document_filename'
                         ));
                 }
-
-
-                //TODO: mostar el documento en un modal con un boton
-                //echo '<a href="#" id="apisunatButton" class="button">Ver Documento</a>';
             }
         } else {
             echo '<p>No se ha enviado la factura a APISUNAT</p>';
@@ -464,7 +440,7 @@ class Apisunat_Admin
 
         $args = array(
             array(
-                'title' => 'Personal ID (personalId): ',
+                'title' => 'personalId: ',
                 'type' => 'input',
                 'id' => 'apisunat_personal_id',
                 'name' => 'apisunat_personal_id',
@@ -474,7 +450,7 @@ class Apisunat_Admin
                 'section' => 'apisunat_general_section',
             ),
             array(
-                'title' => 'Personal Token (personalToken): ',
+                'title' => 'personalToken: ',
                 'type' => 'input',
                 'id' => 'apisunat_personal_token',
                 'name' => 'apisunat_personal_token',

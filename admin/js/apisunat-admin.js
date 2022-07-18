@@ -19,10 +19,6 @@
             apisunat_modal.style.display = "none";
         });
 
-        //TODO: concretar el modal
-
-        //TODO: anular documento
-
         $(document).on("click", "#apisunatSendData", function (e) {
             e.stopImmediatePropagation();
             e.preventDefault();
@@ -44,8 +40,7 @@
 
                 jQuery.post(apisunat_ajax_object.ajax_url, data, async function (response) {
                     window.location = document.location.href;
-                    // $('#apisunatSendData').show();
-                    $('#apisunatLoading').hide();
+                    // $('#apisunatLoading').hide();
                 });
             }
         });
