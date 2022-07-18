@@ -164,23 +164,34 @@ class Apisunat_Admin
         $send_data['plugin_data']['debug'] = get_option('apisunat_debug_mode');
         $send_data['plugin_data']['custom_meta_data'] = get_option('apisunat_custom_checkout');
 
+        $_document_type = get_option('apisunat_key_tipo_comprobante') ? get_option('apisunat_key_tipo_comprobante') : '_billing_apisunat_document_type';
+        $_document_type_value_01 = get_option('apisunat_key_value_factura') ? get_option('apisunat_key_value_factura') : '01';
+        $_document_type_value_03 = get_option('apisunat_key_value_boleta') ? get_option('apisunat_key_value_boleta') : '03';
 
         $send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_document_type'] = [
-            'key' => get_option('apisunat_key_tipo_comprobante', '_billing_apisunat_document_type'),
-            'value_01' => get_option('apisunat_key_value_factura', '01'),
-            'value_03' => get_option('apisunat_key_value_boleta', '03'),
+            'key' => $_document_type,
+            'value_01' => $_document_type_value_01,
+            'value_03' => $_document_type_value_03,
         ];
+
+        $_customer_id_type = get_option('apisunat_key_tipo_documento') ? get_option('apisunat_key_tipo_documento') : '_billing_apisunat_customer_id_type';
+        $_customer_id_type_value_1 = get_option('apisunat_key_value_dni') ? get_option('apisunat_key_value_dni') : '1';
+        $_customer_id_type_value_6 = get_option('apisunat_key_value_ruc') ? get_option('apisunat_key_value_ruc') : '6';
+        $_customer_id_type_value_7 = get_option('apisunat_key_value_pasaporte') ? get_option('apisunat_key_value_pasaporte') : '7';
+        $_customer_id_type_value_B = get_option('apisunat_key_value_otros_extranjero') ? get_option('apisunat_key_value_otros_extranjero') : 'B';
 
         $send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_customer_id_type'] = [
-            'key' => get_option('apisunat_key_tipo_documento', '_billing_apisunat_customer_id_type'),
-            'value_1' => get_option('apisunat_key_value_dni', '1'),
-            'value_6' => get_option('apisunat_key_value_ruc', '6'),
-            'value_7' => get_option('apisunat_key_value_pasaporte', '7'),
-            'value_B' => get_option('apisunat_key_value_otros_extranjero', 'B')
+            'key' => $_customer_id_type,
+            'value_1' => $_customer_id_type_value_1,
+            'value_6' => $_customer_id_type_value_6,
+            'value_7' => $_customer_id_type_value_7,
+            'value_B' => $_customer_id_type_value_B
         ];
 
+        $_apisunat_customer_id = get_option('apisunat_key_numero_documento') ? get_option('apisunat_key_numero_documento') : '_billing_apisunat_customer_id';
+
         $send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_customer_id'] = [
-            'key' => get_option('apisunat_key_numero_documento', '_billing_apisunat_customer_id')
+            'key' => $_apisunat_customer_id
         ];
 
         $send_data['order_data'] = $order->get_data();
