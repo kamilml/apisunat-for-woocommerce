@@ -7,7 +7,7 @@
 <div class="wrap">
     <img src="<?php echo plugin_dir_url(__FILE__); ?>logoMin.png" height="40" width="40">
 
-    <h2>Configuración de APISUNAT</h2>
+    <h2>APISUNAT</h2>
     <hr>
 
     <?php settings_errors(); ?>

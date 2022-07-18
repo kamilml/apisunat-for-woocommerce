@@ -157,9 +157,9 @@ class Apisunat_Admin
         $send_data['plugin_data']['serie01'] = get_option('apisunat_serie_factura');
         $send_data['plugin_data']['serie03'] = get_option('apisunat_serie_boleta');
         $send_data['plugin_data']['affectation'] = get_option('apisunat_tipo_tributo');
-        $send_data['plugin_data']['personaRUC'] = get_option('apisunat_ruc');
-        $send_data['plugin_data']['personaName'] = get_option('apisunat_company_name');
-        $send_data['plugin_data']['personaAddress'] = get_option('apisunat_company_address');
+        // $send_data['plugin_data']['personaRUC'] = get_option('apisunat_ruc');
+        // $send_data['plugin_data']['personaName'] = get_option('apisunat_company_name');
+        // $send_data['plugin_data']['personaAddress'] = get_option('apisunat_company_address');
         $send_data['plugin_data']['issueTime'] = get_option('apisunat_include_time');
         $send_data['plugin_data']['shipping_cost'] = get_option('apisunat_shipping_cost');
         $send_data['plugin_data']['debug'] = get_option('apisunat_debug_mode');
@@ -356,19 +356,19 @@ class Apisunat_Admin
 
         }
 
-        //TODO: preparar anular orden
-//        if ($order->get_meta('apisunat_document_status') == 'ACEPTADO') {
-//
-//            echo '<p><a href="#" id="apisunat_show_anular">Anular?</a></p>';
-//
-//            echo '<div id="apisunat_reason" style="display: none;">';
-//            echo '<textarea rows="5" id="apisunat_nular_reason" placeholder="Razon por la que desea anular" minlength="3" maxlength="100"></textarea>';
-//            echo '<a href="#" id="apisunatAnularData" class="button-primary">Anular con NC</a> ';
-//            echo '<div id="apisunatLoading2" class="mt-3 mx-auto" style="display:none;">
-//                        <img src="images/loading.gif"/>
-//                    </div>';
-//            echo '</div>';
-//        }
+        // //TODO: preparar anular orden
+        // if ($order->get_meta('apisunat_document_status') == 'ACEPTADO') {
+
+        //     echo '<p><a href="#" id="apisunat_show_anular">Anular?</a></p>';
+
+        //     echo '<div id="apisunat_reason" style="display: none;">';
+        //     echo '<textarea rows="5" id="apisunat_nular_reason" placeholder="Razon por la que desea anular" minlength="3" maxlength="100"></textarea>';
+        //     echo '<a href="#" id="apisunatAnularData" class="button-primary">Anular con NC</a> ';
+        //     echo '<div id="apisunatLoading2" class="mt-3 mx-auto" style="display:none;">
+        //                 <img src="images/loading.gif"/>
+        //             </div>';
+        //     echo '</div>';
+        // }
 
     }
 
@@ -459,39 +459,39 @@ class Apisunat_Admin
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_general_section',
             ),
+            // array(
+            //     'title' => 'RUC: ',
+            //     'type' => 'input',
+            //     'id' => 'apisunat_ruc',
+            //     'name' => 'apisunat_ruc',
+            //     'required' => 'true',
+            //     'pattern' => '[12][0567]\d{9}',
+            //     'class' => 'regular-text',
+            //     'group' => 'apisunat_general_settings',
+            //     'section' => 'apisunat_general_section',
+            // ),
+            // array(
+            //     'title' => 'Nombre de la empresa: ',
+            //     'type' => 'input',
+            //     'id' => 'apisunat_company_name',
+            //     'name' => 'apisunat_company_name',
+            //     'required' => 'true',
+            //     'class' => 'regular-text',
+            //     'group' => 'apisunat_general_settings',
+            //     'section' => 'apisunat_general_section',
+            // ),
+            // array(
+            //     'title' => 'Dirección de la empresa: ',
+            //     'type' => 'input',
+            //     'name' => 'apisunat_company_address',
+            //     'id' => 'apisunat_company_address',
+            //     'required' => 'true',
+            //     'class' => 'regular-text',
+            //     'group' => 'apisunat_general_settings',
+            //     'section' => 'apisunat_general_section',
+            // ),
             array(
-                'title' => 'RUC: ',
-                'type' => 'input',
-                'id' => 'apisunat_ruc',
-                'name' => 'apisunat_ruc',
-                'required' => 'true',
-                'pattern' => '[12][0567]\d{9}',
-                'class' => 'regular-text',
-                'group' => 'apisunat_general_settings',
-                'section' => 'apisunat_general_section',
-            ),
-            array(
-                'title' => 'Nombre de la empresa: ',
-                'type' => 'input',
-                'id' => 'apisunat_company_name',
-                'name' => 'apisunat_company_name',
-                'required' => 'true',
-                'class' => 'regular-text',
-                'group' => 'apisunat_general_settings',
-                'section' => 'apisunat_general_section',
-            ),
-            array(
-                'title' => 'Dirección de la empresa: ',
-                'type' => 'input',
-                'name' => 'apisunat_company_address',
-                'id' => 'apisunat_company_address',
-                'required' => 'true',
-                'class' => 'regular-text',
-                'group' => 'apisunat_general_settings',
-                'section' => 'apisunat_general_section',
-            ),
-            array(
-                'title' => 'Envio de facturas de forma: ',
+                'title' => 'Tipo de envío: ',
                 'type' => 'select',
                 'name' => 'apisunat_forma_envio',
                 'id' => 'apisunat_forma_envio',
@@ -504,7 +504,7 @@ class Apisunat_Admin
                 'section' => 'apisunat_data_section',
             ),
             array(
-                'title' => 'Número de serie para Facturas: ',
+                'title' => 'Serie - Factura: ',
                 'type' => 'input',
                 'name' => 'apisunat_serie_factura',
                 'id' => 'apisunat_serie_factura',
@@ -516,7 +516,7 @@ class Apisunat_Admin
                 'section' => 'apisunat_data_section',
             ),
             array(
-                'title' => 'Número de serie para Boletas: ',
+                'title' => 'Serie - Boleta: ',
                 'type' => 'input',
                 'name' => 'apisunat_serie_boleta',
                 'id' => 'apisunat_serie_boleta',
@@ -554,7 +554,7 @@ class Apisunat_Admin
                 'section' => 'apisunat_data_section',
             ),
             array(
-                'title' => 'Incluir hora en el documento: ',
+                'title' => 'Hora de emisión: ',
                 'type' => 'select',
                 'name' => 'apisunat_include_time',
                 'id' => 'apisunat_include_time',
@@ -567,7 +567,20 @@ class Apisunat_Admin
                 'section' => 'apisunat_data_section',
             ),
             array(
-                'title' => 'Habilitar Campos Personalizados: ',
+                'title' => 'Modo Debug: ',
+                'type' => 'select',
+                'name' => 'apisunat_debug_mode',
+                'id' => 'apisunat_debug_mode',
+                'required' => true,
+                'options' => array(
+                    "false" => 'NO',
+                    "true" => 'SI'
+                ),
+                'group' => 'apisunat_general_settings',
+                'section' => 'apisunat_advanced_section',
+            ),
+            array(
+                'title' => 'Campos Personalizados: ',
                 'type' => 'select',
                 'name' => 'apisunat_custom_checkout',
                 'id' => 'apisunat_custom_checkout',
@@ -586,7 +599,7 @@ class Apisunat_Admin
                 'id' => 'apisunat_key_tipo_comprobante',
                 'default' => '_billing_apisunat_document_type',
                 'required' => true,
-                'class' => 'regular-text',
+                'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
@@ -597,7 +610,7 @@ class Apisunat_Admin
                 'id' => 'apisunat_key_value_factura',
                 'default' => '01',
                 'required' => true,
-                'class' => 'regular-text',
+                'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
@@ -608,7 +621,7 @@ class Apisunat_Admin
                 'id' => 'apisunat_key_value_boleta',
                 'default' => '03',
                 'required' => true,
-                'class' => 'regular-text',
+                'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
@@ -619,7 +632,7 @@ class Apisunat_Admin
                 'id' => 'apisunat_key_tipo_documento',
                 'default' => '_billing_apisunat_customer_id_type',
                 'required' => true,
-                'class' => 'regular-text',
+                'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
@@ -630,7 +643,7 @@ class Apisunat_Admin
                 'id' => 'apisunat_key_value_dni',
                 'default' => '1',
                 'required' => true,
-                'class' => 'regular-text',
+                'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
@@ -641,7 +654,7 @@ class Apisunat_Admin
                 'id' => 'apisunat_key_value_ce',
                 'default' => '4',
                 'required' => true,
-                'class' => 'regular-text',
+                'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
@@ -652,7 +665,7 @@ class Apisunat_Admin
                 'id' => 'apisunat_key_value_ruc',
                 'default' => '6',
                 'required' => true,
-                'class' => 'regular-text',
+                'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
@@ -663,7 +676,7 @@ class Apisunat_Admin
                 'id' => 'apisunat_key_value_pasaporte',
                 'default' => '7',
                 'required' => true,
-                'class' => 'regular-text',
+                'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
@@ -674,20 +687,7 @@ class Apisunat_Admin
                 'id' => 'apisunat_key_numero_documento',
                 'default' => '_billing_apisunat_customer_id',
                 'required' => true,
-                'class' => 'regular-text',
-                'group' => 'apisunat_general_settings',
-                'section' => 'apisunat_advanced_section',
-            ),
-            array(
-                'title' => 'Modo Debug: ',
-                'type' => 'select',
-                'name' => 'apisunat_debug_mode',
-                'id' => 'apisunat_debug_mode',
-                'required' => true,
-                'options' => array(
-                    "false" => 'NO',
-                    "true" => 'SI'
-                ),
+                'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
@@ -717,10 +717,10 @@ class Apisunat_Admin
     public function apisunat_display_general_account(): void
     {
         ?>
-        <h4>Asegúrate de susbscribirte a <a href="https://apisunat.com/" target="_blank">APISUNAT</a> y obtener los
-            datos de acceso</h4>
-        <hr>
-        <?php
+<h4>Los datos de acceso se obtienen al crear una empresa en <a href="https://apisunat.com/" target="_blank">APISUNAT</a>
+</h4>
+<hr>
+<?php
     }
 
     /**
@@ -732,9 +732,9 @@ class Apisunat_Admin
     public function apisunat_display_data(): void
     {
         ?>
-        <h3>Configuración para envio de datos</h3>
-        <hr>
-        <?php
+<h3>Configuración</h3>
+<hr>
+<?php
     }
 
     /**
@@ -746,9 +746,9 @@ class Apisunat_Admin
     public function apisunat_display_advanced(): void
     {
         ?>
-        <h3>Configuración avanzada</h3>
-        <hr>
-        <?php
+<h3>Configuración avanzada</h3>
+<hr>
+<?php
     }
 
     /**
