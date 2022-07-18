@@ -174,7 +174,7 @@ class Apisunat_Admin
         $send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_customer_id_type'] = [
             'key' => get_option('apisunat_key_tipo_documento', '_billing_apisunat_customer_id_type'),
             'value_1' => get_option('apisunat_key_value_dni', '1'),
-            'value_4' => get_option('apisunat_key_value_ce', '4'),
+            // 'value_4' => get_option('apisunat_key_value_ce', '4'),
             'value_6' => get_option('apisunat_key_value_ruc', '6'),
             'value_7' => get_option('apisunat_key_value_pasaporte', '7'),
             'value_B' => get_option('apisunat_key_value_otros_extranjero', 'B')
@@ -619,17 +619,17 @@ class Apisunat_Admin
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
-            array(
-                'title' => 'value para CE: ',
-                'type' => 'input',
-                'name' => 'apisunat_key_value_ce',
-                'id' => 'apisunat_key_value_ce',
-                'placeholder' => '4',
-                'required' => true,
-                'class' => 'regular-text regular-text-advanced',
-                'group' => 'apisunat_general_settings',
-                'section' => 'apisunat_advanced_section',
-            ),
+            // array(
+            //     'title' => 'value para CE: ',
+            //     'type' => 'input',
+            //     'name' => 'apisunat_key_value_ce',
+            //     'id' => 'apisunat_key_value_ce',
+            //     'placeholder' => '4',
+            //     'required' => true,
+            //     'class' => 'regular-text regular-text-advanced',
+            //     'group' => 'apisunat_general_settings',
+            //     'section' => 'apisunat_advanced_section',
+            // ),
             array(
                 'title' => 'value para RUC: ',
                 'type' => 'input',

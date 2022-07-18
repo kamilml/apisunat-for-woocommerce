@@ -124,8 +124,7 @@ class Apisunat_Public
             'class' => array('form-row-wide'), // add class name
             'options' => array(
                 '6' => 'RUC',
-                '1' => 'DOCUMENTO NACIONAL DE IDENTIDAD (DNI)',
-                '4' => 'Carnet de Extranjería (CE)',
+                '1' => 'DNI',
                 '7' => 'PASAPORTE',
                 'B' => 'OTROS (Doc. Extranjero)',
             ),
