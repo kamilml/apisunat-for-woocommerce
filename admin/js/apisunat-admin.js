@@ -47,13 +47,22 @@
 
 
         // show/hide for advanced options
-        if ($( "#apisunat_custom_checkout" ).val() === "false") $('.regular-text.regular-text-advanced').hide();
+        if ($( "#apisunat_custom_checkout" ).val() === "false") {
+            $('.regular-text.regular-text-advanced').hide();
+            $('.regular-text.regular-text-advanced').attr('required', null)
+        }
 
         $(document).on("change", "#apisunat_custom_checkout", function(e) {
             const value = e.target.value;
             
-            if (value === "true") $('.regular-text.regular-text-advanced').show();
-            if (value === "false") $('.regular-text.regular-text-advanced').hide();
+            if (value === "true") {
+                $('.regular-text.regular-text-advanced').show();
+                $('.regular-text.regular-text-advanced').attr('required', true)
+            }
+            if (value === "false") {
+                $('.regular-text.regular-text-advanced').hide();
+                $('.regular-text.regular-text-advanced').attr('required', null)
+            }
         });
     });
 

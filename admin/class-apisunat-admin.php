@@ -154,14 +154,13 @@ class Apisunat_Admin
         $send_data = [];
         $send_data['plugin_data']['personaId'] = get_option('apisunat_personal_id');
         $send_data['plugin_data']['personaToken'] = get_option('apisunat_personal_token');
+
         $send_data['plugin_data']['serie01'] = get_option('apisunat_serie_factura');
         $send_data['plugin_data']['serie03'] = get_option('apisunat_serie_boleta');
         $send_data['plugin_data']['affectation'] = get_option('apisunat_tipo_tributo');
-        // $send_data['plugin_data']['personaRUC'] = get_option('apisunat_ruc');
-        // $send_data['plugin_data']['personaName'] = get_option('apisunat_company_name');
-        // $send_data['plugin_data']['personaAddress'] = get_option('apisunat_company_address');
         $send_data['plugin_data']['issueTime'] = get_option('apisunat_include_time');
         $send_data['plugin_data']['shipping_cost'] = get_option('apisunat_shipping_cost');
+        
         $send_data['plugin_data']['debug'] = get_option('apisunat_debug_mode');
         $send_data['plugin_data']['custom_meta_data'] = get_option('apisunat_custom_checkout');
 
@@ -177,7 +176,8 @@ class Apisunat_Admin
             'value_1' => get_option('apisunat_key_value_dni', '1'),
             'value_4' => get_option('apisunat_key_value_ce', '4'),
             'value_6' => get_option('apisunat_key_value_ruc', '6'),
-            'value_7' => get_option('apisunat_key_value_pasaporte', '7')
+            'value_7' => get_option('apisunat_key_value_pasaporte', '7'),
+            'value_B' => get_option('apisunat_key_value_otros_extranjero', 'B')
         ];
 
         $send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_customer_id'] = [
@@ -444,7 +444,7 @@ class Apisunat_Admin
                 'type' => 'input',
                 'id' => 'apisunat_personal_id',
                 'name' => 'apisunat_personal_id',
-                'required' => 'true',
+                'required' => true,
                 'class' => 'regular-text',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_general_section',
@@ -454,42 +454,12 @@ class Apisunat_Admin
                 'type' => 'input',
                 'id' => 'apisunat_personal_token',
                 'name' => 'apisunat_personal_token',
-                'required' => 'true',
+                'required' => true,
                 'class' => 'regular-text',
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_general_section',
             ),
-            // array(
-            //     'title' => 'RUC: ',
-            //     'type' => 'input',
-            //     'id' => 'apisunat_ruc',
-            //     'name' => 'apisunat_ruc',
-            //     'required' => 'true',
-            //     'pattern' => '[12][0567]\d{9}',
-            //     'class' => 'regular-text',
-            //     'group' => 'apisunat_general_settings',
-            //     'section' => 'apisunat_general_section',
-            // ),
-            // array(
-            //     'title' => 'Nombre de la empresa: ',
-            //     'type' => 'input',
-            //     'id' => 'apisunat_company_name',
-            //     'name' => 'apisunat_company_name',
-            //     'required' => 'true',
-            //     'class' => 'regular-text',
-            //     'group' => 'apisunat_general_settings',
-            //     'section' => 'apisunat_general_section',
-            // ),
-            // array(
-            //     'title' => 'Dirección de la empresa: ',
-            //     'type' => 'input',
-            //     'name' => 'apisunat_company_address',
-            //     'id' => 'apisunat_company_address',
-            //     'required' => 'true',
-            //     'class' => 'regular-text',
-            //     'group' => 'apisunat_general_settings',
-            //     'section' => 'apisunat_general_section',
-            // ),
+
             array(
                 'title' => 'Tipo de envío: ',
                 'type' => 'select',
@@ -566,8 +536,9 @@ class Apisunat_Admin
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_data_section',
             ),
+
             array(
-                'title' => 'Modo Debug: ',
+                'title' => 'Debug (NO ACTIVAR): ',
                 'type' => 'select',
                 'name' => 'apisunat_debug_mode',
                 'id' => 'apisunat_debug_mode',
@@ -579,8 +550,9 @@ class Apisunat_Admin
                 'group' => 'apisunat_general_settings',
                 'section' => 'apisunat_advanced_section',
             ),
+
             array(
-                'title' => 'Campos Personalizados: ',
+                'title' => 'Checkout personalizado: ',
                 'type' => 'select',
                 'name' => 'apisunat_custom_checkout',
                 'id' => 'apisunat_custom_checkout',
@@ -597,7 +569,7 @@ class Apisunat_Admin
                 'type' => 'input',
                 'name' => 'apisunat_key_tipo_comprobante',
                 'id' => 'apisunat_key_tipo_comprobante',
-                'default' => '_billing_apisunat_document_type',
+                'placeholder' => '_billing_apisunat_document_type',
                 'required' => true,
                 'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
@@ -608,7 +580,7 @@ class Apisunat_Admin
                 'type' => 'input',
                 'name' => 'apisunat_key_value_factura',
                 'id' => 'apisunat_key_value_factura',
-                'default' => '01',
+                'placeholder' => '01',
                 'required' => true,
                 'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
@@ -619,7 +591,7 @@ class Apisunat_Admin
                 'type' => 'input',
                 'name' => 'apisunat_key_value_boleta',
                 'id' => 'apisunat_key_value_boleta',
-                'default' => '03',
+                'placeholder' => '03',
                 'required' => true,
                 'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
@@ -630,7 +602,7 @@ class Apisunat_Admin
                 'type' => 'input',
                 'name' => 'apisunat_key_tipo_documento',
                 'id' => 'apisunat_key_tipo_documento',
-                'default' => '_billing_apisunat_customer_id_type',
+                'placeholder' => '_billing_apisunat_customer_id_type',
                 'required' => true,
                 'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
@@ -641,7 +613,7 @@ class Apisunat_Admin
                 'type' => 'input',
                 'name' => 'apisunat_key_value_dni',
                 'id' => 'apisunat_key_value_dni',
-                'default' => '1',
+                'placeholder' => '1',
                 'required' => true,
                 'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
@@ -652,7 +624,7 @@ class Apisunat_Admin
                 'type' => 'input',
                 'name' => 'apisunat_key_value_ce',
                 'id' => 'apisunat_key_value_ce',
-                'default' => '4',
+                'placeholder' => '4',
                 'required' => true,
                 'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
@@ -663,7 +635,7 @@ class Apisunat_Admin
                 'type' => 'input',
                 'name' => 'apisunat_key_value_ruc',
                 'id' => 'apisunat_key_value_ruc',
-                'default' => '6',
+                'placeholder' => '6',
                 'required' => true,
                 'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
@@ -674,7 +646,18 @@ class Apisunat_Admin
                 'type' => 'input',
                 'name' => 'apisunat_key_value_pasaporte',
                 'id' => 'apisunat_key_value_pasaporte',
-                'default' => '7',
+                'placeholder' => '7',
+                'required' => true,
+                'class' => 'regular-text regular-text-advanced',
+                'group' => 'apisunat_general_settings',
+                'section' => 'apisunat_advanced_section',
+            ),
+            array(
+                'title' => 'value para OTROS (Doc. Extranjero): ',
+                'type' => 'input',
+                'name' => 'apisunat_key_value_otros_extranjero',
+                'id' => 'apisunat_key_value_otros_extranjero',
+                'placeholder' => 'B',
                 'required' => true,
                 'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
@@ -685,7 +668,7 @@ class Apisunat_Admin
                 'type' => 'input',
                 'name' => 'apisunat_key_numero_documento',
                 'id' => 'apisunat_key_numero_documento',
-                'default' => '_billing_apisunat_customer_id',
+                'placeholder' => '_billing_apisunat_customer_id',
                 'required' => true,
                 'class' => 'regular-text regular-text-advanced',
                 'group' => 'apisunat_general_settings',
@@ -762,13 +745,13 @@ class Apisunat_Admin
     {
         $required_attr = $args['required'] ? "required" : "";
         $pattern_attr = isset($args['pattern']) ? "pattern=" . $args['pattern'] : "";
+        $palceholder_attr = isset($args['placeholder']) ? "placeholder=" . $args['placeholder'] : "";
         $default_value = $args['default'] ?? "";
 
         switch ($args['type']) {
             case 'input':
                 printf(
-                    '<input type="' . $args['type'] . '" id="' . $args['id'] . '" name="' . $args['name'] . '"class="' . $args['class'] . '"' . $required_attr . ' ' . $pattern_attr . '  value="%s" />',
-                    // '<input type="' . $args['type'] . '" id="' . $args['id'] . '" name="' . $args['name'] . '"class="' . $args['class'] . '" required="' . $args['required'] . '" value="%s" />',
+                    '<input type="' . $args['type'] . '" id="' . $args['id'] . '" name="' . $args['name'] . '"class="' . $args['class'] . '"' . $required_attr . ' ' . $palceholder_attr . ' ' . $pattern_attr . '  value="%s" />',
                     get_option($args['id']) ? esc_attr(get_option($args['id'])) : $default_value
                 );
                 break;

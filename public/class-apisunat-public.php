@@ -54,7 +54,7 @@ class Apisunat_Public
 
         if (isset($_POST['billing_apisunat_customer_id_type'])) {
 
-            $pattern = "/^[a-zA-Z\d]{15}$/";
+            $pattern = "/^[a-zA-Z\d]{1,15}$/";
 
             if ($_POST['billing_apisunat_customer_id_type'] == '6') {
                 $pattern = "/[12][0567]\d{9}$/";
@@ -82,9 +82,9 @@ class Apisunat_Public
 
                     $errors->add('validation', "<strong>Nombre o Apellidos: </strong> Deben contener al menos 3 caracteres para boletas.");
                 }
-                if ($_POST['billing_apisunat_customer_id_type'] == '6') {
-                    $errors->add('validation', "<strong>Tipo de Identificacion: </strong> no admitido para realizar Boletas.");
-                }
+                // if ($_POST['billing_apisunat_customer_id_type'] == '6') {
+                //     $errors->add('validation', "<strong>Tipo de Identificacion: </strong> no admitido para realizar Boletas.");
+                // }
 
             }
         }
@@ -126,7 +126,8 @@ class Apisunat_Public
                 '6' => 'RUC',
                 '1' => 'DOCUMENTO NACIONAL DE IDENTIDAD (DNI)',
                 '4' => 'Carnet de Extranjería (CE)',
-                '7' => 'Pasaporte',
+                '7' => 'PASAPORTE',
+                'B' => 'OTROS (Doc. Extranjero)',
             ),
             'priority' => 22,
         );
