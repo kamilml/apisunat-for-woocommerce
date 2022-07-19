@@ -22,11 +22,9 @@ if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins',
 	add_action(
 		'admin_notices',
 		function () {
-			$notice = <<<HTML
-					<div class="notice notice-error is-dismissible">
-	        				<p>APISUNAT está <strong>Activado</strong> pero necesita <a href="https://wordpress.org/plugins/woocommerce/" target="_blank">WooCommerce</a> para funcionar. Por favor instala <a href="https://wordpress.org/plugins/woocommerce/" target="_blank">WooCommerce</a> antes de continuar.
-    				</div>
-HTML;
+			$notice = "<div class=\"notice notice-error is-dismissible\">
+	        				<p>APISUNAT está <strong>Activado</strong> pero necesita <a href=\"https://wordpress.org/plugins/woocommerce/\" target=\"_blank\">WooCommerce</a> para funcionar. Por favor instala <a href=\"https://wordpress.org/plugins/woocommerce/\" target=\"_blank\">WooCommerce</a> antes de continuar.
+    				</div>";
 			echo $notice;
 		}
 	);
