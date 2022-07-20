@@ -1,4 +1,13 @@
-(function ($) {
-    "use strict";
+/**
+ * Fired during plugin uninstall
+ *
+ * @link       https://apisunat.com/
+ * @since      1.0.0
+ *
+ * @package    Apisunat
+ */
 
-})(jQuery);
+(function () {
+	"use strict";
+
+})( jQuery );
