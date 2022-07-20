@@ -1,5 +1,11 @@
 <?php
-
+/**
+ * Apisunat
+ *
+ * @package   Apisunat
+ * @author    Apisunat
+ * @link     http://apisunat.com
+ */
 class Apisunat {
 
 	/**
@@ -70,8 +76,7 @@ class Apisunat {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function load_dependencies(): void
-    {
+	private function load_dependencies(): void {
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
@@ -109,8 +114,7 @@ class Apisunat {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function set_locale(): void
-    {
+	private function set_locale(): void {
 
 		$plugin_i18n = new Apisunat_i18n();
 
@@ -125,14 +129,13 @@ class Apisunat {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_admin_hooks(): void
-    {
+	private function define_admin_hooks(): void {
 
 		$plugin_admin = new Apisunat_Admin( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-        $this->loader->add_action('apisunat_five_minutes_event', $plugin_admin,'apisunat_check_status_on_schedule');
+		$this->loader->add_action( 'apisunat_five_minutes_event', $plugin_admin, 'apisunat_check_status_on_schedule' );
 
 	}
 
@@ -143,8 +146,7 @@ class Apisunat {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_public_hooks(): void
-    {
+	private function define_public_hooks(): void {
 
 		$plugin_public = new Apisunat_Public( $this->get_plugin_name(), $this->get_version() );
 
@@ -158,8 +160,7 @@ class Apisunat {
 	 *
 	 * @since    1.0.0
 	 */
-	public function run(): void
-    {
+	public function run(): void {
 		$this->loader->run();
 	}
 
@@ -170,8 +171,7 @@ class Apisunat {
 	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
 	 */
-	public function get_plugin_name(): string
-    {
+	public function get_plugin_name(): string {
 		return $this->plugin_name;
 	}
 
@@ -181,8 +181,7 @@ class Apisunat {
 	 * @since     1.0.0
 	 * @return    Apisunat_Loader    Orchestrates the hooks of the plugin.
 	 */
-	public function get_loader(): Apisunat_Loader
-    {
+	public function get_loader(): Apisunat_Loader {
 		return $this->loader;
 	}
 
@@ -192,8 +191,7 @@ class Apisunat {
 	 * @since     1.0.0
 	 * @return    string    The version number of the plugin.
 	 */
-	public function get_version(): string
-    {
+	public function get_version(): string {
 		return $this->version;
 	}
 

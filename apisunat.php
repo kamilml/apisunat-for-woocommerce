@@ -1,6 +1,6 @@
 <?php
-
-/*
+/**
+ * @package     Apisunat
  * Plugin Name:       APISUNAT
  * Plugin URI:        https://apisunat.com/
  * Description:       Emite tus comprobantes electrónicos para SUNAT-PERU directamente desde tu tienda en WooCommerce.
@@ -10,7 +10,7 @@
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       APISUNAT
- */
+ **/
 
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
@@ -22,9 +22,9 @@ if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins',
 	add_action(
 		'admin_notices',
 		function () {
-			$notice = "<div class=\"notice notice-error is-dismissible\">
+			$notice = '<div class=\"notice notice-error is-dismissible\">
 	        				<p>APISUNAT está <strong>Activado</strong> pero necesita <a href=\"https://wordpress.org/plugins/woocommerce/\" target=\"_blank\">WooCommerce</a> para funcionar. Por favor instala <a href=\"https://wordpress.org/plugins/woocommerce/\" target=\"_blank\">WooCommerce</a> antes de continuar.
-    				</div>";
+    				</div>';
 			echo $notice;
 		}
 	);
