@@ -128,7 +128,7 @@ class Apisunat_Admin {
 		);
 
 		foreach ( $orders as $order ) {
-			if ( $order->meta_exists( 'apisunat_document_id' && $order->get_meta( 'apisunat_document_status' ) === 'PENDIENTE' ) ) {
+			if ( $order->meta_exists( 'apisunat_document_id' ) && $order->get_meta( 'apisunat_document_status' ) === 'PENDIENTE' ) {
 					$request = wp_remote_get( self::API_URL . '/documents/' . $order->get_meta( 'apisunat_document_id' ) . '/getById' );
 					$data    = json_decode( wp_remote_retrieve_body( $request ), true );
 					$status  = $data['status'];
