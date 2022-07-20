@@ -1,6 +1,17 @@
 <?php
 /**
- * @package     Apisunat
+ * The plugin bootstrap file
+ *
+ * This file is read by WordPress to generate the plugin information in the plugin
+ * admin area. This file also includes all of the dependencies used by the plugin,
+ * registers the activation and deactivation functions, and defines a function
+ * that starts the plugin.
+ *
+ * @link              https://apisunat.com/
+ * @since             1.0.0
+ * @package           Apisunat
+ *
+ * @wordpress-plugin
  * Plugin Name:       APISUNAT
  * Plugin URI:        https://apisunat.com/
  * Description:       Emite tus comprobantes electrónicos para SUNAT-PERU directamente desde tu tienda en WooCommerce.
@@ -22,10 +33,12 @@ if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins',
 	add_action(
 		'admin_notices',
 		function () {
-			$notice = '<div class=\"notice notice-error is-dismissible\">
+			printf(
+				'<div class=\"notice notice-error is-dismissible\">
 	        				<p>APISUNAT está <strong>Activado</strong> pero necesita <a href=\"https://wordpress.org/plugins/woocommerce/\" target=\"_blank\">WooCommerce</a> para funcionar. Por favor instala <a href=\"https://wordpress.org/plugins/woocommerce/\" target=\"_blank\">WooCommerce</a> antes de continuar.
-    				</div>';
-			echo $notice;
+    				</div>'
+			);
+
 		}
 	);
 
@@ -41,8 +54,7 @@ const APISUNAT_VERSION = '1.0.7';
  * The code that runs during plugin activation.
  * This action is documented in includes/class-apisunat-activator.php
  */
-function activate_apisunat(): void
-{
+function activate_apisunat(): void {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-apisunat-activator.php';
 	Apisunat_Activator::activate();
 }
@@ -51,8 +63,7 @@ function activate_apisunat(): void
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-apisunat-deactivator.php
  */
-function deactivate_apisunat(): void
-{
+function deactivate_apisunat(): void {
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-apisunat-deactivator.php';
 	Apisunat_Deactivator::deactivate();
 }
@@ -61,10 +72,9 @@ function deactivate_apisunat(): void
  * The code that runs during plugin uninstall.
  * This action is documented in includes/class-apisunat-uninstaller.php
  */
-function uninstall_apisunat(): void
-{
-    require_once plugin_dir_path( __FILE__ ) . 'includes/class-apisunat-uninstaller.php';
-    Apisunat_Uninstaller::uninstall();
+function uninstall_apisunat(): void {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-apisunat-uninstaller.php';
+	Apisunat_Uninstaller::uninstall();
 }
 
 register_activation_hook( __FILE__, 'activate_apisunat' );
@@ -80,8 +90,7 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-apisunat.php';
 /**
  * Begins execution of the plugin.
  */
-function run_apisunat(): void
-{
+function run_apisunat(): void {
 
 	$plugin = new Apisunat();
 	$plugin->run();

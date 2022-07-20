@@ -1,12 +1,24 @@
 <?php
 /**
- * Public class
+ * The public-facing functionality of the plugin.
  *
  * @link       https://apisunat.com/
  * @since      1.0.0
  *
  * @package    Apisunat
- **/
+ * @subpackage Apisunat/public
+ */
+
+/**
+ * The public-facing functionality of the plugin.
+ *
+ * Defines the plugin name, version, and two examples hooks for how to
+ * enqueue the public-facing stylesheet and JavaScript.
+ *
+ * @package    Apisunat
+ * @subpackage Apisunat/public
+ * @author     Apisunat
+ */
 class Apisunat_Public {
 
 
@@ -52,11 +64,12 @@ class Apisunat_Public {
 	/**
 	 * Validate checkout custom fields
 	 *
-	 * @param array $errors Errors.
+	 * @param $data
+	 * @param $errors
 	 * @return void
 	 * @since 1.0.0
 	 */
-	public function apisunat_custom_fields_validate( array $errors ): void {
+	public function apisunat_custom_fields_validate( $data, $errors ): void {
 
 		if ( isset( $_POST['billing_apisunat_customer_id_type'] ) ) {
 

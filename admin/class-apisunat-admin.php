@@ -1,12 +1,24 @@
 <?php
 /**
- * Public class
+ * The admin-specific functionality of the plugin.
  *
  * @link       https://apisunat.com/
  * @since      1.0.0
  *
  * @package    Apisunat
- **/
+ * @subpackage Apisunat/admin
+ */
+
+/**
+ * The admin-specific functionality of the plugin.
+ *
+ * Defines the plugin name, version, and two examples hooks for how to
+ * enqueue the admin-specific stylesheet and JavaScript.
+ *
+ * @package    Apisunat
+ * @subpackage Apisunat/admin
+ * @author     Heikel Villar <heikelvillar@gmail.com>
+ */
 class Apisunat_Admin {
 
 	const API_WC_URL = 'https://ecommerces-api.apisunat.com/v1.1/woocommerce';
@@ -145,7 +157,7 @@ class Apisunat_Admin {
 	/**
 	 * Prepare payload and send info to APISUNAT API
 	 *
-	 * @param string $order_id Order Id.
+	 * @param $order_id
 	 * @return void
 	 * @since    1.0.0
 	 */
@@ -309,11 +321,11 @@ class Apisunat_Admin {
 	/**
 	 * Add APISUNAT meta box data
 	 *
-	 * @param string $order_id The order id.
+	 * @param $order_id
 	 * @return void
 	 * @since    1.0.0
 	 */
-	public function order_meta_box_apisunat( string $order_id ): void {
+	public function order_meta_box_apisunat( $order_id ): void {
 		$order = wc_get_order( $order_id );
 		if ( $order->meta_exists( 'apisunat_document_status' ) ) {
 			{
