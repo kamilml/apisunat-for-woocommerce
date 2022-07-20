@@ -707,7 +707,7 @@ class Apisunat_Admin {
 	 */
 	public function apisunat_display_general_account(): void {
 		?>
-			<h4>Los datos de acceso se obtienen al crear una empresa en <a href="https://apisunat.com/" target="_blank">APISUNAT</a></h4>
+			<h4>Los datos de acceso se obtienen al crear una empresa en <a href="https://apisunat.com/" target="_blank" rel="noopener">APISUNAT</a></h4>
 			<hr>
 		<?php
 	}
