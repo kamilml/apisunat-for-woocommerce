@@ -4,7 +4,7 @@ Donate link: https://apisunat.com/
 Tags: WP, apisunat, facturacion, facturacion electronica, factura, boleta, WooCommerce, CPE, Peru
 Requires at least: 5.8
 Tested up to: 6.0.1
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -74,6 +74,9 @@ Este plugin es gratuito. [APISUNAT.com](https://apisunat.com/) tiene un costo (e
 2. Configuración - 2.png
 
 == Changelog ==
+
+= 1.0.8 =
+Correcciones recomendadas por el equipo de revisión de plugins de wordpress
 
 = 1.0.7 =
 Se corrigió el bug de no poner nada en los inputs de la configuración del Checkout personalizado.
