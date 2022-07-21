@@ -1,4 +1,4 @@
-=== APISUNAT Facturación Electrónica for WooCommerce - Perú ===
+=== APISUNAT Facturación Electrónica para WooCommerce - SUNAT - PERU ===
 Contributors: kamilml
 Donate link: https://apisunat.com/
 Tags: WP, apisunat, facturacion, facturacion electronica, factura, boleta, WooCommerce, CPE, Peru

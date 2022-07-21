@@ -12,7 +12,7 @@
  * @package           Apisunat
  *
  * @wordpress-plugin
- * Plugin Name:       APISUNAT
+ * Plugin Name:       APISUNAT Facturación Electrónica para WooCommerce - SUNAT - PERU
  * Plugin URI:        https://github.com/kamilml/apisunat-for-woocommerce
  * Description:       Emite tus comprobantes electrónicos para SUNAT-PERU directamente desde tu tienda en WooCommerce.
  * Version:           1.0.8
