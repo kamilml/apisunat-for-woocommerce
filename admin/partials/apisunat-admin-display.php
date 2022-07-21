@@ -14,9 +14,7 @@
 ?>
 
 <div class="wrap">
-	<img src="<?php echo esc_attr( plugin_dir_url( __FILE__ ) ); ?>logoMin.png" height="40" width="40" alt="apisunat">
-
-	<h2>APISUNAT</h2>
+	<h1>APISUNAT - Facturación Electrónica</h1>
 	<hr>
 
 	<?php settings_errors(); ?>
