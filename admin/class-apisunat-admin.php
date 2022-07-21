@@ -83,7 +83,7 @@ class Apisunat_Admin {
 		foreach ( $columns as $key => $column ) {
 			$reordered_columns[ $key ] = $column;
 			if ( 'order_status' === $key ) {
-				$reordered_columns['apisunat_document_status'] = 'APISUNAT Status';
+				$reordered_columns['apisunat_document_files'] = 'Comprobante';
 			}
 		}
 		return $reordered_columns;
@@ -97,15 +97,37 @@ class Apisunat_Admin {
 	 * @return void
 	 * @since    1.0.0
 	 */
-	public function apisunat_custom_orders_list_column_content( $column, $post_id ): void {
-		if ( 'apisunat_document_status' === $column ) {
+	public function apisunat_custom_orders_list_column_content( string $column, string $post_id ): void {
+		if ( 'apisunat_document_files' === $column ) {
 			$status = get_post_meta( $post_id, 'apisunat_document_status', true );
-			if ( ! empty( $status ) ) {
-				echo esc_attr( $status );
-			}
+			$doc_id = get_post_meta( $post_id, 'apisunat_document_id', true );
 
 			if ( empty( $status ) ) {
 				echo '<small>(<em>no enviado</em>)</small>';
+			}
+
+			if ( in_array( array( 'ERROR', 'RECHAZADO', 'EXCEPCION' ), $status, true ) ) {
+				echo esc_attr( $status );
+			} else {
+				$request = wp_remote_get( self::API_URL . '/documents/' . $doc_id . '/getById' );
+				$data    = json_decode( wp_remote_retrieve_body( $request ), true );
+				$xml     = $data['xml'];
+
+				if ( ! empty( $xml ) ) {
+					printf(
+						"<a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank' class='button'>PDF</a>",
+						esc_attr( get_post_meta( $post_id, 'apisunat_document_id', true ) ),
+						esc_attr( get_post_meta( $post_id, 'apisunat_document_filename', true ) )
+					);
+					printf(
+						" <a href=%s target=_blank' class='button'>XML</a>",
+						esc_attr( $xml )
+					);
+				}
+
+				if ( empty( $xml ) ) {
+					echo '<small>(<em>sin comprobantes</em>)</small>';
+				}
 			}
 		}
 	}
