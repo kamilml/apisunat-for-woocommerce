@@ -69,8 +69,9 @@ Esta guía te muestra como pasar al modo PRODUCCION (modo real). O puedes contac
 Este plugin es gratuito. [APISUNAT.com](https://apisunat.com/) tiene un costo (el mejor del mercado) que puedes consultar por su WhatsApp.
 
 == Screenshots ==
-1. Instalación
-2. Configuración
+1. APISUNAT.com
+2. Instalación
+3. Configuración
 
 == Changelog ==
 
