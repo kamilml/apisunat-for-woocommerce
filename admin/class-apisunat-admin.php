@@ -114,7 +114,7 @@ class Apisunat_Admin {
 				$data    = json_decode( wp_remote_retrieve_body( $request ), true );
 				$xml     = $data['xml'];
 
-				if ( ! empty( $xml ) ) {
+				if ( isset( $xml ) && ! empty( $xml ) ) {
 					printf(
 						"<a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank' class='button'>PDF</a>",
 						esc_attr( get_post_meta( $post_id, 'apisunat_document_id', true ) ),
@@ -124,10 +124,6 @@ class Apisunat_Admin {
 						" <a href=%s target=_blank' class='button'>XML</a>",
 						esc_attr( $xml )
 					);
-				}
-
-				if ( empty( $xml ) ) {
-					echo '<small>(<em>sin comprobantes</em>)</small>';
 				}
 			}
 		}

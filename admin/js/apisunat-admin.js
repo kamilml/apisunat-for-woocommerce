@@ -3,7 +3,7 @@
 
 	jQuery( document ).ready(
 		function ($) {
-			const apisunat_modal  = document.getElementById( 'apisunatModal' );
+			const apisunat_modal = document.getElementById( 'apisunatModal' );
 
 			const button_save = document.getElementsByName( "save" )
 
