@@ -99,14 +99,15 @@ class Apisunat_Admin {
 	 */
 	public function apisunat_custom_orders_list_column_content( string $column, string $post_id ): void {
 		if ( 'apisunat_document_files' === $column ) {
-			$status = get_post_meta( $post_id, 'apisunat_document_status', true );
-			$doc_id = get_post_meta( $post_id, 'apisunat_document_id', true );
+			$status  = get_post_meta( $post_id, 'apisunat_document_status', true );
+			$doc_id  = get_post_meta( $post_id, 'apisunat_document_id', true );
+			$estados = array( 'ERROR', 'RECHAZADO', 'EXCEPCION' );
 
 			if ( empty( $status ) ) {
 				echo '<small>(<em>no enviado</em>)</small>';
 			}
 
-			if ( in_array( array( 'ERROR', 'RECHAZADO', 'EXCEPCION' ), $status, true ) ) {
+			if ( in_array( $status, $estados, true ) ) {
 				echo esc_attr( $status );
 			} else {
 				$request = wp_remote_get( self::API_URL . '/documents/' . $doc_id . '/getById' );
