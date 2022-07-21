@@ -1,10 +1,10 @@
-=== APISUNAT Facturación Electrónica for WooCommerce - Perú ===
+=== APISUNAT Facturación Electrónica para WooCommerce - SUNAT - PERU ===
 Contributors: kamilml
 Donate link: https://apisunat.com/
 Tags: WP, apisunat, facturacion, facturacion electronica, factura, boleta, WooCommerce, CPE, Peru
 Requires at least: 5.8
 Tested up to: 6.0.1
-Stable tag: 1.0.7
+Stable tag: 1.0.8
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -38,16 +38,15 @@ Antes de empezar a facturar en modo real, puedes probar el modo DESARROLLO gener
 
 == Instalación ==
 
-1. Descarga este repositorio en un **.zip**
-2. Ve a la sección **Plugins / Agregar nuevo**
-3. Sube el archivo zip y activa el plugin
+1. Abre tu panel de WordPress
+2. Ve a **Plugins / Agregar nuevo**
+3. Busca **“APISUNAT”** e instálalo
 
 == Configuración ==
 
-1. Crea una cuenta en [APISUNAT.com](https://apisunat.com/)
-2. Registra una empresa ahí
-3. Ve a **Configuración de Empresa / API REST** y busca el valor del **personaId** y el **personaToken** (opcionalmente puedes configurar ahí el logotipo, nombre comercial, series, encabezado, pie de página, etc.)
-4. Vuelve a la configuración del plugin en WordPress y rellena los casilleros con la información obtenida.
+1. Crea una empresa en [APISUNAT.com](https://apisunat.com/)
+2. Ve a la **Configuración de Empresa / API REST** y busca los valores **personaId** y **personaToken**
+3. Vuelve a la configuración del plugin en WordPress y usa esos valores
 
 == Configuración Avanzada ==
 
@@ -70,10 +69,14 @@ Esta guía te muestra como pasar al modo PRODUCCION (modo real). O puedes contac
 Este plugin es gratuito. [APISUNAT.com](https://apisunat.com/) tiene un costo (el mejor del mercado) que puedes consultar por su WhatsApp.
 
 == Screenshots ==
-1. Instalación - 1.png
-2. Configuración - 2.png
+1. APISUNAT.com
+2. Instalación
+3. Configuración
 
 == Changelog ==
+
+= 1.0.8 =
+Correcciones recomendadas por el equipo de revisión de plugins de wordpress
 
 = 1.0.7 =
 Se corrigió el bug de no poner nada en los inputs de la configuración del Checkout personalizado.

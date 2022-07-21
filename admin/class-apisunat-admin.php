@@ -707,8 +707,8 @@ class Apisunat_Admin {
 	 */
 	public function apisunat_display_general_account(): void {
 		?>
-			<h4>Los datos de acceso se obtienen al crear una empresa en <a href="https://apisunat.com/" target="_blank" rel="noopener">APISUNAT</a></h4>
-			<hr>
+			<h4>Los datos de acceso se obtienen al crear una empresa en <a href="https://apisunat.com/" target="_blank" rel="noopener">APISUNAT.com</a></h4>
+			<!-- <hr> -->
 		<?php
 	}
 
@@ -720,8 +720,8 @@ class Apisunat_Admin {
 	 */
 	public function apisunat_display_data(): void {
 		?>
-			<h3>Configuración</h3>
 			<hr>
+			<h3>Configuración</h3>
 		<?php
 	}
 
@@ -733,8 +733,8 @@ class Apisunat_Admin {
 	 */
 	public function apisunat_display_advanced(): void {
 		?>
-			<h3>Configuración avanzada</h3>
 			<hr>
+			<h3>Configuración avanzada</h3>
 		<?php
 	}
 
