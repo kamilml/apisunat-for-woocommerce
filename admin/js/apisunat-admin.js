@@ -3,7 +3,7 @@
 
 	jQuery( document ).ready(
 		function ($) {
-			const apisunat_modal  = document.getElementById( 'apisunatModal' );
+			const apisunat_modal = document.getElementById( 'apisunatModal' );
 
 			const button_save = document.getElementsByName( "save" )
 
@@ -28,21 +28,21 @@
 
 			$( document ).on(
 				"click",
-				"#apisunatSendData",
+				".emit_button",
 				function (e) {
 					e.stopImmediatePropagation();
 					e.preventDefault();
 
-					let orderId     = $( '#orderId' ).val();
-					let orderStatus = $( '#orderStatus' ).val();
+					let orderId     = e.target.id;
+					let orderStatus = $( this ).attr( "apistatus" );
 
 					if (orderStatus !== 'completed') {
 						alert( "La orden debe completarse para poder enviar los datos" );
 
 					} else {
 
-						$( '#apisunatSendData' ).hide();
-						$( '#apisunatLoading' ).show();
+						$( this ).hide();
+						$( '#apisunatLoading' + orderId ).show();
 						let data = {
 							action: 'send_apisunat_order',
 							order_value: orderId
