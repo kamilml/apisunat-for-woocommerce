@@ -99,12 +99,13 @@ class Apisunat_Admin {
 	 */
 	public function apisunat_custom_orders_list_column_content( string $column, string $post_id ): void {
 		if ( 'apisunat_document_files' === $column ) {
+			$order   = wc_get_order( $post_id );
 			$status  = get_post_meta( $post_id, 'apisunat_document_status', true );
 			$doc_id  = get_post_meta( $post_id, 'apisunat_document_id', true );
 			$estados = array( 'ERROR', 'RECHAZADO', 'EXCEPCION' );
 
 			if ( empty( $status ) ) {
-				echo '<small>(<em>no enviado</em>)</small>';
+				$this->boton_emitir( $order->get_id(), $order->get_status() );
 			}
 
 			if ( in_array( $status, $estados, true ) ) {
@@ -112,9 +113,8 @@ class Apisunat_Admin {
 			} else {
 				$request = wp_remote_get( self::API_URL . '/documents/' . $doc_id . '/getById' );
 				$data    = json_decode( wp_remote_retrieve_body( $request ), true );
-				$xml     = $data['xml'];
 
-				if ( isset( $xml ) && ! empty( $xml ) ) {
+				if ( isset( $data['xml'] ) ) {
 					printf(
 						"<a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank' class='button'>PDF</a>",
 						esc_attr( get_post_meta( $post_id, 'apisunat_document_id', true ) ),
@@ -122,7 +122,7 @@ class Apisunat_Admin {
 					);
 					printf(
 						" <a href=%s target=_blank' class='button'>XML</a>",
-						esc_attr( $xml )
+						esc_attr( $data['xml'] )
 					);
 				}
 			}
@@ -383,20 +383,14 @@ class Apisunat_Admin {
 			if ( $order->get_meta( 'apisunat_document_status' ) === 'ERROR' ||
 				$order->get_meta( 'apisunat_document_status' ) === 'EXCEPCION' ||
 				$order->get_meta( 'apisunat_document_status' ) === 'RECHAZADO' ) {
-				echo '<a id="apisunatSendData" class="button-primary">Enviar Comprobante</a> ';
-				echo '<div id="apisunatLoading" class="mt-3 mx-auto" style="display:none;">
-                        <img src="images/loading.gif" alt="loading"/>
-                    </div>';
+				$this->boton_emitir( $order->get_id(), $order->get_status() );
 			}
 		} elseif ( get_option( 'apisunat_forma_envio' ) === 'manual' ) {
 			if ( ! $order->get_meta( 'apisunat_document_status' ) ||
 				$order->get_meta( 'apisunat_document_status' ) === 'ERROR' ||
 				$order->get_meta( 'apisunat_document_status' ) === 'EXCEPCION' ||
 				$order->get_meta( 'apisunat_document_status' ) === 'RECHAZADO' ) {
-				echo '<a id="apisunatSendData" class="button-primary">Enviar Comprobante</a> ';
-				echo '<div id="apisunatLoading" class="mt-3 mx-auto" style="display:none;">
-                        <img src="images/loading.gif" alt="loading"/>
-                    </div>';
+				$this->boton_emitir( $order->get_id(), $order->get_status() );
 			}
 		}
 
@@ -815,5 +809,22 @@ class Apisunat_Admin {
 	public function enqueue_scripts(): void {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/apisunat-admin.js', array( 'jquery' ), $this->version, true );
 		wp_localize_script( $this->plugin_name, 'apisunat_ajax_object', array( 'ajax_url' => admin_url( 'admin-ajax.php' ) ) );
+	}
+
+	/**
+	 * Show button
+	 *
+	 * @param null $id Order id.
+	 * @param null $status Order status.
+	 * @return void
+	 */
+	public function boton_emitir( $id = null, $status = null ): void {
+		echo sprintf( '<a id="%s" apistatus="%s" class="button-primary emit_button">Emitir CPE</a> ', esc_attr( $id ), esc_attr( $status ) );
+		echo sprintf(
+			'<div id="apisunatLoading%s" class="mt-3 mx-auto" style="display:none;">
+                        <img src="images/loading.gif" alt="loading"/>
+                    </div>',
+			esc_attr( $id )
+		);
 	}
 }
