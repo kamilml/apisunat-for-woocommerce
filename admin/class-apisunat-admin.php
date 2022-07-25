@@ -68,6 +68,20 @@ class Apisunat_Admin {
 			10,
 			2
 		);
+		add_filter( 'plugin_action_links_apisunat/apisunat.php', array( $this, 'apisunat_settings_link' ) );
+	}
+
+	/**
+	 * Add settings links.
+	 *
+	 * @param array $links Plugins links.
+	 * @return array
+	 */
+	public function apisunat_settings_link( array $links ): array {
+		$url           = get_admin_url() . 'admin.php?page=' . $this->plugin_name;
+		$settings_link = '<a href="' . $url . '">Configuracion</a>';
+		$links[]       = $settings_link;
+		return $links;
 	}
 
 	/**
@@ -193,48 +207,7 @@ class Apisunat_Admin {
 			}
 		}
 
-		$send_data                                = array();
-		$send_data['plugin_data']['personaId']    = get_option( 'apisunat_personal_id' );
-		$send_data['plugin_data']['personaToken'] = get_option( 'apisunat_personal_token' );
-
-		$send_data['plugin_data']['serie01']       = get_option( 'apisunat_serie_factura' );
-		$send_data['plugin_data']['serie03']       = get_option( 'apisunat_serie_boleta' );
-		$send_data['plugin_data']['affectation']   = get_option( 'apisunat_tipo_tributo' );
-		$send_data['plugin_data']['issueTime']     = get_option( 'apisunat_include_time' );
-		$send_data['plugin_data']['shipping_cost'] = get_option( 'apisunat_shipping_cost' );
-
-		$send_data['plugin_data']['debug']            = get_option( 'apisunat_debug_mode' );
-		$send_data['plugin_data']['custom_meta_data'] = get_option( 'apisunat_custom_checkout' );
-
-		$_document_type          = get_option( 'apisunat_key_tipo_comprobante' ) ? get_option( 'apisunat_key_tipo_comprobante' ) : '_billing_apisunat_document_type';
-		$_document_type_value_01 = get_option( 'apisunat_key_value_factura' ) ? get_option( 'apisunat_key_value_factura' ) : '01';
-		$_document_type_value_03 = get_option( 'apisunat_key_value_boleta' ) ? get_option( 'apisunat_key_value_boleta' ) : '03';
-
-		$send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_document_type'] = array(
-			'key'      => $_document_type,
-			'value_01' => $_document_type_value_01,
-			'value_03' => $_document_type_value_03,
-		);
-
-		$_customer_id_type         = get_option( 'apisunat_key_tipo_documento' ) ? get_option( 'apisunat_key_tipo_documento' ) : '_billing_apisunat_customer_id_type';
-		$_customer_id_type_value_1 = get_option( 'apisunat_key_value_dni' ) ? get_option( 'apisunat_key_value_dni' ) : '1';
-		$_customer_id_type_value_6 = get_option( 'apisunat_key_value_ruc' ) ? get_option( 'apisunat_key_value_ruc' ) : '6';
-		$_customer_id_type_value_7 = get_option( 'apisunat_key_value_pasaporte' ) ? get_option( 'apisunat_key_value_pasaporte' ) : '7';
-		$_customer_id_type_value_b = get_option( 'apisunat_key_value_otros_extranjero' ) ? get_option( 'apisunat_key_value_otros_extranjero' ) : 'B';
-
-		$send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_customer_id_type'] = array(
-			'key'     => $_customer_id_type,
-			'value_1' => $_customer_id_type_value_1,
-			'value_6' => $_customer_id_type_value_6,
-			'value_7' => $_customer_id_type_value_7,
-			'value_B' => $_customer_id_type_value_b,
-		);
-
-		$_apisunat_customer_id = get_option( 'apisunat_key_numero_documento' ) ? get_option( 'apisunat_key_numero_documento' ) : '_billing_apisunat_customer_id';
-
-		$send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_customer_id'] = array(
-			'key' => $_apisunat_customer_id,
-		);
+		$send_data = $this->build_send_data();
 
 		$send_data['order_data'] = $order->get_data();
 
@@ -271,7 +244,12 @@ class Apisunat_Admin {
 				update_post_meta( $order_idd, 'apisunat_document_id', $apisunat_response['documentId'] );
 				update_post_meta( $order_idd, 'apisunat_document_filename', $apisunat_response['fileName'] );
 
-				$msg = 'Los datos se han enviado a APISUNAT';
+				$msg = sprintf(
+					"Se emitió la Factura <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>%s</a>",
+					$apisunat_response['documentId'],
+					$apisunat_response['fileName'],
+					$this->splitBillsNumbers( $apisunat_response['fileName'] )
+				);
 			}
 		}
 		$order->add_order_note( $msg );
@@ -283,40 +261,72 @@ class Apisunat_Admin {
 	 * @return void
 	 * @since    1.0.0
 	 */
-	public function void_apisunat_order(): void {
+	public function void_apisunat_order() {
 		if ( isset( $_POST['order_value'] ) ) {
 			$order_id = intval( $_POST['order_value'] );
 
-			$order = wc_get_order( $order_id );
+			$order       = wc_get_order( $order_id );
+			$document_id = $order->get_meta( 'apisunat_document_id' );
+			$filename    = $order->get_meta( 'apisunat_document_filename' );
 
-			$body = array(
-				'personaId'    => get_option( 'apisunat_personal_id' ),
-				'personaToken' => get_option( 'apisunat_personal_token' ),
-				'documentId'   => $order->get_meta( 'apisunat_document_id' ),
-				'reason'       => isset( $_POST['reason'] ) ? sanitize_text_field( wp_unslash( $_POST['reason'] ) ) : '',
-			);
+			$number = $this->splitBillsNumbers( $order->get_meta( 'apisunat_document_filename' ) );
+
+			$send_data = $this->build_send_data();
+
+			$this->array_insert( $send_data['plugin_data'], 4, array( 'serie07F' => get_option( 'apisunat_serie_nc_factura' ) ) );
+			$this->array_insert( $send_data['plugin_data'], 5, array( 'serie07B' => get_option( 'apisunat_serie_nc_boleta' ) ) );
+
+			$send_data['reason'] = isset( $_POST['reason'] ) ? sanitize_text_field( wp_unslash( $_POST['reason'] ) ) : '';
 
 			$args = array(
 				'method'  => 'POST',
 				'timeout' => 45,
-				'body'    => wp_json_encode( $body ),
+				'body'    => wp_json_encode( $send_data ),
 				'headers' => array(
 					'content-type' => 'application/json',
 				),
 			);
 
-			$response = wp_remote_post( self::API_URL . '/personas/v1/voidBill', $args );
+			$response = wp_remote_post( self::API_WC_URL . '/' . $document_id, $args );
 
 			if ( is_wp_error( $response ) ) {
 				$error_response = $response->get_error_message();
 				$msg            = $error_response;
 			} else {
 				$apisunat_response = json_decode( $response['body'], true );
+				update_post_meta( $order_id, 'apisunat_document_status', $apisunat_response['status'] );
 
-				$msg = $apisunat_response;
+				if ( 'ERROR' === $apisunat_response['status'] ) {
+					$msg = $apisunat_response['error']['message'];
+				} else {
+					update_post_meta( $order_id, 'apisunat_document_id', $apisunat_response['documentId'] );
+					update_post_meta( $order_id, 'apisunat_document_filename', $apisunat_response['fileName'] );
+
+					$msg = sprintf(
+						"Se anuló la Factura <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>%s</a> con la Nota de Crédito %s. Motivo: '%s' ",
+						esc_attr( $document_id ),
+						esc_attr( $filename ),
+						$number,
+						$this->splitBillsNumbers( $apisunat_response['fileName'] ),
+						$send_data['reason']
+					);
+				}
 			}
 			$order->add_order_note( $msg );
 		}
+	}
+
+	/**
+	 * Extra function
+	 *
+	 * @param array   $array Input array.
+	 * @param integer $position Array position.
+	 * @param array   $insert_array Array inserted.
+	 * @return void
+	 */
+	private function array_insert( array &$array, int $position, array $insert_array ) {
+		$first_array = array_splice( $array, 0, $position );
+		$array       = array_merge( $first_array, $insert_array, $array );
 	}
 
 	/**
@@ -359,16 +369,17 @@ class Apisunat_Admin {
 					break;
 			}
 
-				$number = explode( '-', $order->get_meta( 'apisunat_document_filename' ) );
+				$number = $this->splitBillsNumbers( $order->get_meta( 'apisunat_document_filename' ) );
 
 				printf( '<p>Status: <strong> %s</strong></p>', esc_attr( $order->get_meta( 'apisunat_document_status' ) ) );
 
 			if ( $order->meta_exists( 'apisunat_document_id' ) ) {
-				printf( '<p>Numero %s: <strong> %s</strong></p>', esc_attr( $tipo ), esc_attr( $number[2] ) . '-' . esc_attr( $number[3] ) );
-				printf(
-					"<p><a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>Imprimir</a></p>",
+				echo sprintf(
+					"<p>Numero %s: <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'><strong>%s</strong></a>",
+					esc_attr( $tipo ),
 					esc_attr( $order->get_meta( 'apisunat_document_id' ) ),
-					esc_attr( $order->get_meta( 'apisunat_document_filename' ) )
+					esc_attr( $order->get_meta( 'apisunat_document_filename' ) ),
+					esc_attr( $number )
 				);
 			}
 			}
@@ -394,17 +405,18 @@ class Apisunat_Admin {
 			}
 		}
 
-		// TODO: preparar anular orden.
-		// if ($order->get_meta('apisunat_document_status') == 'ACEPTADO') {
-		// echo '<p><a href="#" id="apisunat_show_anular">Anular?</a></p>';
-		// echo '<div id="apisunat_reason" style="display: none;">';
-		// echo '<textarea rows="5" id="apisunat_nular_reason" placeholder="Razon por la que desea anular" minlength="3" maxlength="100"></textarea>';
-		// echo '<a href="#" id="apisunatAnularData" class="button-primary">Anular con NC</a> ';
-		// echo '<div id="apisunatLoading2" class="mt-3 mx-auto" style="display:none;">
-		// <img src="images/loading.gif"/>
-		// </div>';
-		// echo '</div>';
-		// }.
+		if ( $order->get_meta( 'apisunat_document_status' ) === 'ACEPTADO' ) {
+			printf( '<p><a href="#" id="apisunat_show_anular">Anular?</a></p>' );
+			printf( '<div id="apisunat_reason" style="display: none;">' );
+			printf( '<textarea rows="5" id="apisunat_anular_reason" placeholder="Razon por la que desea anular" minlength="3" maxlength="100"></textarea>' );
+			printf( '<a href="#" id="apisunatAnularData" class="button-primary">Anular con NC</a> ' );
+			printf(
+				'<div id="apisunatLoading2" class="mt-3 mx-auto" style="display:none;">
+		                <img src="images/loading.gif"/>
+		                </div>'
+			);
+			printf( '</div>' );
+		}
 	}
 
 	/**
@@ -525,6 +537,30 @@ class Apisunat_Admin {
 				'default'  => 'B001',
 				'required' => true,
 				'pattern'  => '^[B][A-Z\d]{3}$',
+				'class'    => 'regular-text',
+				'group'    => 'apisunat_general_settings',
+				'section'  => 'apisunat_data_section',
+			),
+			array(
+				'title'    => 'Serie - NC Factura: ',
+				'type'     => 'input',
+				'name'     => 'apisunat_serie_nc_factura',
+				'id'       => 'apisunat_serie_nc_factura',
+				'default'  => 'FC01',
+				'required' => true,
+				'pattern'  => '^[F][C][A-Z\d]{2}$',
+				'class'    => 'regular-text',
+				'group'    => 'apisunat_general_settings',
+				'section'  => 'apisunat_data_section',
+			),
+			array(
+				'title'    => 'Serie - NC Boleta: ',
+				'type'     => 'input',
+				'name'     => 'apisunat_serie_nc_boleta',
+				'id'       => 'apisunat_serie_nc_boleta',
+				'default'  => 'BC01',
+				'required' => true,
+				'pattern'  => '^[B][C][A-Z\d]{2}$',
 				'class'    => 'regular-text',
 				'group'    => 'apisunat_general_settings',
 				'section'  => 'apisunat_data_section',
@@ -826,5 +862,64 @@ class Apisunat_Admin {
                     </div>',
 			esc_attr( $id )
 		);
+	}
+
+	/**
+	 * @return array
+	 */
+	public function build_send_data(): array {
+		$send_data                                = array();
+		$send_data['plugin_data']['personaId']    = get_option( 'apisunat_personal_id' );
+		$send_data['plugin_data']['personaToken'] = get_option( 'apisunat_personal_token' );
+
+		$send_data['plugin_data']['serie01']       = get_option( 'apisunat_serie_factura' );
+		$send_data['plugin_data']['serie03']       = get_option( 'apisunat_serie_boleta' );
+		$send_data['plugin_data']['affectation']   = get_option( 'apisunat_tipo_tributo' );
+		$send_data['plugin_data']['issueTime']     = get_option( 'apisunat_include_time' );
+		$send_data['plugin_data']['shipping_cost'] = get_option( 'apisunat_shipping_cost' );
+
+		$send_data['plugin_data']['debug']            = get_option( 'apisunat_debug_mode' );
+		$send_data['plugin_data']['custom_meta_data'] = get_option( 'apisunat_custom_checkout' );
+
+		$_document_type          = get_option( 'apisunat_key_tipo_comprobante' ) ? get_option( 'apisunat_key_tipo_comprobante' ) : '_billing_apisunat_document_type';
+		$_document_type_value_01 = get_option( 'apisunat_key_value_factura' ) ? get_option( 'apisunat_key_value_factura' ) : '01';
+		$_document_type_value_03 = get_option( 'apisunat_key_value_boleta' ) ? get_option( 'apisunat_key_value_boleta' ) : '03';
+
+		$send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_document_type'] = array(
+			'key'      => $_document_type,
+			'value_01' => $_document_type_value_01,
+			'value_03' => $_document_type_value_03,
+		);
+
+		$_customer_id_type         = get_option( 'apisunat_key_tipo_documento' ) ? get_option( 'apisunat_key_tipo_documento' ) : '_billing_apisunat_customer_id_type';
+		$_customer_id_type_value_1 = get_option( 'apisunat_key_value_dni' ) ? get_option( 'apisunat_key_value_dni' ) : '1';
+		$_customer_id_type_value_6 = get_option( 'apisunat_key_value_ruc' ) ? get_option( 'apisunat_key_value_ruc' ) : '6';
+		$_customer_id_type_value_7 = get_option( 'apisunat_key_value_pasaporte' ) ? get_option( 'apisunat_key_value_pasaporte' ) : '7';
+		$_customer_id_type_value_b = get_option( 'apisunat_key_value_otros_extranjero' ) ? get_option( 'apisunat_key_value_otros_extranjero' ) : 'B';
+
+		$send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_customer_id_type'] = array(
+			'key'     => $_customer_id_type,
+			'value_1' => $_customer_id_type_value_1,
+			'value_6' => $_customer_id_type_value_6,
+			'value_7' => $_customer_id_type_value_7,
+			'value_B' => $_customer_id_type_value_b,
+		);
+
+		$_apisunat_customer_id = get_option( 'apisunat_key_numero_documento' ) ? get_option( 'apisunat_key_numero_documento' ) : '_billing_apisunat_customer_id';
+
+		$send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_customer_id'] = array(
+			'key' => $_apisunat_customer_id,
+		);
+
+		return $send_data;
+	}
+
+	/**
+	 * @param string $filename
+	 * @return string
+	 */
+	public function splitBillsNumbers( string $filename ): string {
+		$split_filename = explode( '-', $filename );
+		return $split_filename[2] . '-' . $split_filename[3];
 	}
 }
