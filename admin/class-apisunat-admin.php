@@ -59,15 +59,7 @@ class Apisunat_Admin {
 		add_action( 'admin_init', array( $this, 'apisunat_forma_envio_facturas' ) );
 		add_action( 'wp_ajax_void_apisunat_order', array( $this, 'void_apisunat_order' ), 11, 1 );
 		add_filter( 'manage_edit-shop_order_columns', array( $this, 'apisunat_custom_order_column' ), 11 );
-		add_action(
-			'manage_shop_order_posts_custom_column',
-			array(
-				$this,
-				'apisunat_custom_orders_list_column_content',
-			),
-			10,
-			2
-		);
+		add_action( 'manage_shop_order_posts_custom_column', array( $this, 'apisunat_custom_orders_list_column_content' ), 10, 2 );
 		add_filter( 'plugin_action_links_apisunat/apisunat.php', array( $this, 'apisunat_settings_link' ) );
 	}
 
@@ -221,7 +213,7 @@ class Apisunat_Admin {
 
 		$args = array(
 			'method'  => 'POST',
-			'timeout' => 45,
+			'timeout' => 30,
 			'body'    => wp_json_encode( $send_data ),
 			'headers' => array(
 				'content-type' => 'application/json',
@@ -236,20 +228,26 @@ class Apisunat_Admin {
 			$msg            = $error_response;
 		} else {
 			$apisunat_response = json_decode( $response['body'], true );
-			update_post_meta( $order_idd, 'apisunat_document_status', $apisunat_response['status'] );
 
-			if ( 'ERROR' === $apisunat_response['status'] ) {
-				$msg = $apisunat_response['error']['message'];
+			if ( ! isset( $apisunat_response['status'] ) ) {
+				$msg = wp_json_encode( $apisunat_response );
 			} else {
-				update_post_meta( $order_idd, 'apisunat_document_id', $apisunat_response['documentId'] );
-				update_post_meta( $order_idd, 'apisunat_document_filename', $apisunat_response['fileName'] );
 
-				$msg = sprintf(
-					"Se emitió la Factura <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>%s</a>",
-					$apisunat_response['documentId'],
-					$apisunat_response['fileName'],
-					$this->splitBillsNumbers( $apisunat_response['fileName'] )
-				);
+				update_post_meta( $order_idd, 'apisunat_document_status', $apisunat_response['status'] );
+
+				if ( 'ERROR' === $apisunat_response['status'] ) {
+					$msg = wp_json_encode( $apisunat_response['error'] );
+				} else {
+					update_post_meta( $order_idd, 'apisunat_document_id', $apisunat_response['documentId'] );
+					update_post_meta( $order_idd, 'apisunat_document_filename', $apisunat_response['fileName'] );
+
+					$msg = sprintf(
+						"Se emitió la Factura <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>%s</a>",
+						$apisunat_response['documentId'],
+						$apisunat_response['fileName'],
+						$this->split_bills_numbers( $apisunat_response['fileName'] )
+					);
+				}
 			}
 		}
 		$order->add_order_note( $msg );
@@ -269,14 +267,33 @@ class Apisunat_Admin {
 			$document_id = $order->get_meta( 'apisunat_document_id' );
 			$filename    = $order->get_meta( 'apisunat_document_filename' );
 
-			$number = $this->splitBillsNumbers( $order->get_meta( 'apisunat_document_filename' ) );
+			$option_name = get_option( 'apisunat_key_tipo_comprobante' );
+
+			$tipo = '';
+
+			switch ( $order->get_meta( $option_name ) ) {
+				case '01':
+					$tipo = 'Factura';
+					break;
+				case '03':
+					$tipo = 'Boleta de Venta';
+					break;
+			}
+
+			$number = $this->split_bills_numbers( $order->get_meta( 'apisunat_document_filename' ) );
 
 			$send_data = $this->build_send_data();
 
 			$this->array_insert( $send_data['plugin_data'], 4, array( 'serie07F' => get_option( 'apisunat_serie_nc_factura' ) ) );
 			$this->array_insert( $send_data['plugin_data'], 5, array( 'serie07B' => get_option( 'apisunat_serie_nc_boleta' ) ) );
 
-			$send_data['reason'] = isset( $_POST['reason'] ) ? sanitize_text_field( wp_unslash( $_POST['reason'] ) ) : '';
+			if ( isset( $_POST['reason'] ) ) {
+				$reason = sanitize_text_field( wp_unslash( $_POST['reason'] ) );
+			}
+
+			$send_data['document_data']['reason']         = $reason;
+			$send_data['document_data']['documentId']     = $document_id;
+			$send_data['document_data']['customer_email'] = $order->get_billing_email();
 
 			$args = array(
 				'method'  => 'POST',
@@ -290,26 +307,30 @@ class Apisunat_Admin {
 			$response = wp_remote_post( self::API_WC_URL . '/' . $document_id, $args );
 
 			if ( is_wp_error( $response ) ) {
-				$error_response = $response->get_error_message();
+				$error_response = $response->get_error_code();
 				$msg            = $error_response;
 			} else {
 				$apisunat_response = json_decode( $response['body'], true );
-				update_post_meta( $order_id, 'apisunat_document_status', $apisunat_response['status'] );
 
-				if ( 'ERROR' === $apisunat_response['status'] ) {
-					$msg = $apisunat_response['error']['message'];
-				} else {
-					update_post_meta( $order_id, 'apisunat_document_id', $apisunat_response['documentId'] );
-					update_post_meta( $order_id, 'apisunat_document_filename', $apisunat_response['fileName'] );
+				if ( 'PENDIENTE' === $apisunat_response['status'] ) {
+					delete_post_meta( $order_id, 'apisunat_document_status' );
+					delete_post_meta( $order_id, 'apisunat_document_id' );
+					delete_post_meta( $order_id, 'apisunat_document_filename' );
 
 					$msg = sprintf(
-						"Se anuló la Factura <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>%s</a> con la Nota de Crédito %s. Motivo: '%s' ",
+						"Se anuló la %s <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>%s</a> con la Nota de Crédito <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>%s</a>. Motivo: '%s' ",
+						esc_attr( $tipo ),
 						esc_attr( $document_id ),
 						esc_attr( $filename ),
 						$number,
-						$this->splitBillsNumbers( $apisunat_response['fileName'] ),
-						$send_data['reason']
+						$apisunat_response['documentId'],
+						$apisunat_response['fileName'],
+						$this->split_bills_numbers( $apisunat_response['fileName'] ),
+						$send_data['document_data']['reason']
 					);
+				} else {
+
+					$msg = wp_json_encode( $apisunat_response['error'] );
 				}
 			}
 			$order->add_order_note( $msg );
@@ -365,13 +386,16 @@ class Apisunat_Admin {
 					$tipo = 'Factura';
 					break;
 				case '03':
-					$tipo = 'Boleta';
+					$tipo = 'Boleta de Venta';
 					break;
 			}
 
-				$number = $this->splitBillsNumbers( $order->get_meta( 'apisunat_document_filename' ) );
+			if ( $order->meta_exists( 'apisunat_document_filename' ) ) {
+
+				$number = $this->split_bills_numbers( $order->get_meta( 'apisunat_document_filename' ) );
 
 				printf( '<p>Status: <strong> %s</strong></p>', esc_attr( $order->get_meta( 'apisunat_document_status' ) ) );
+			}
 
 			if ( $order->meta_exists( 'apisunat_document_id' ) ) {
 				echo sprintf(
@@ -390,23 +414,15 @@ class Apisunat_Admin {
 		echo sprintf( '<input type="hidden" id="orderId" name="orderId" value="%s">', esc_attr( $order->get_id() ) );
 		echo sprintf( '<input type="hidden" id="orderStatus" name="orderStatus" value="%s">', esc_attr( $order->get_status() ) );
 
-		if ( get_option( 'apisunat_forma_envio' ) === 'auto' ) {
-			if ( $order->get_meta( 'apisunat_document_status' ) === 'ERROR' ||
-				$order->get_meta( 'apisunat_document_status' ) === 'EXCEPCION' ||
-				$order->get_meta( 'apisunat_document_status' ) === 'RECHAZADO' ) {
-				$this->boton_emitir( $order->get_id(), $order->get_status() );
-			}
-		} elseif ( get_option( 'apisunat_forma_envio' ) === 'manual' ) {
-			if ( ! $order->get_meta( 'apisunat_document_status' ) ||
+		if ( ! $order->get_meta( 'apisunat_document_status' ) ||
 				$order->get_meta( 'apisunat_document_status' ) === 'ERROR' ||
 				$order->get_meta( 'apisunat_document_status' ) === 'EXCEPCION' ||
 				$order->get_meta( 'apisunat_document_status' ) === 'RECHAZADO' ) {
-				$this->boton_emitir( $order->get_id(), $order->get_status() );
-			}
+			$this->boton_emitir( $order->get_id(), $order->get_status() );
 		}
 
 		if ( $order->get_meta( 'apisunat_document_status' ) === 'ACEPTADO' ) {
-			printf( '<p><a href="#" id="apisunat_show_anular">Anular?</a></p>' );
+			printf( '<p><a href="#" id="apisunat_show_anular" class="button-primary apisunat-button">Anular</a></p>' );
 			printf( '<div id="apisunat_reason" style="display: none;">' );
 			printf( '<textarea rows="5" id="apisunat_anular_reason" placeholder="Razon por la que desea anular" minlength="3" maxlength="100"></textarea>' );
 			printf( '<a href="#" id="apisunatAnularData" class="button-primary">Anular con NC</a> ' );
@@ -855,7 +871,8 @@ class Apisunat_Admin {
 	 * @return void
 	 */
 	public function boton_emitir( $id = null, $status = null ): void {
-		echo sprintf( '<a id="%s" apistatus="%s" class="button-primary emit_button">Emitir CPE</a> ', esc_attr( $id ), esc_attr( $status ) );
+		$disabled = $status === 'completed' ? '' : 'disabled';
+		echo sprintf( '<button id="%s" apistatus="%s" class="button-primary emit_button" %s>Emitir CPE</button> ', esc_attr( $id ), esc_attr( $status ), esc_attr( $disabled ), );
 		echo sprintf(
 			'<div id="apisunatLoading%s" class="mt-3 mx-auto" style="display:none;">
                         <img src="images/loading.gif" alt="loading"/>
@@ -865,6 +882,8 @@ class Apisunat_Admin {
 	}
 
 	/**
+	 * Prepare payload data
+	 *
 	 * @return array
 	 */
 	public function build_send_data(): array {
@@ -915,10 +934,12 @@ class Apisunat_Admin {
 	}
 
 	/**
-	 * @param string $filename
+	 * Split filename and get number.
+	 *
+	 * @param string $filename fileName.
 	 * @return string
 	 */
-	public function splitBillsNumbers( string $filename ): string {
+	public function split_bills_numbers( string $filename ): string {
 		$split_filename = explode( '-', $filename );
 		return $split_filename[2] . '-' . $split_filename[3];
 	}

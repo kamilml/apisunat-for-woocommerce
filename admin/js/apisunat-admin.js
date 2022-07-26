@@ -106,6 +106,13 @@
 					e.stopImmediatePropagation();
 					e.preventDefault();
 
+					const trimmed       = $.trim( $( "#apisunat_anular_reason" ).val() );
+					const reason_length = trimmed.length;
+					if (reason_length < 3) {
+						alert( "La razon por la que desea anular debe contener al menos 3 caracteres!" )
+						return false;
+					}
+
 					let orderId = $( '#orderId' ).val();
 
 					$( '#apisunatAnularData' ).hide();
