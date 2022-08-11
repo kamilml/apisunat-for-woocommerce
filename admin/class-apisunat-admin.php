@@ -102,12 +102,7 @@ class Apisunat_Admin {
 	 * @return void
 	 */
 	public function apisunat_editable_order_meta_billing( WC_Order $order ) {
-
-		// if ( ! $order->meta_exists( '_billing_apisunat_meta_data_mapping' ) ) {
-		// $meta_data_mapping = self::build_meta_data_mapping();
-		// update_post_meta( $order->get_id(), '_billing_apisunat_meta_data_mapping', wp_json_encode( $meta_data_mapping ) );
-		// }
-
+        
 		$meta_temp = $order->get_meta( '_billing_apisunat_meta_data_mapping' );
 
 		$temp = array();
