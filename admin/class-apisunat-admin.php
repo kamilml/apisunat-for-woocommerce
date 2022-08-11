@@ -21,8 +21,26 @@
  */
 class Apisunat_Admin {
 
-	const API_WC_URL = 'https://ecommerces-api.apisunat.com/v1.1/woocommerce';
-	const API_URL    = 'https://back.apisunat.com';
+	const API_WC_URL        = 'https://ecommerces-api.apisunat.com/v1.2/woocommerce';
+	const API_URL           = 'https://back.apisunat.com';
+	const META_DATA_MAPPING = array(
+		'_billing_apisunat_document_type'    => array(
+			'key'      => '_billing_apisunat_document_type',
+			'value_01' => '01',
+			'value_03' => '03',
+		),
+		'_billing_apisunat_customer_id_type' => array(
+			'key'     => '_billing_apisunat_customer_id_type',
+			'value_1' => '1',
+			'value_6' => '6',
+			'value_7' => '7',
+			'value_B' => 'B',
+		),
+		'_billing_apisunat_customer_id'      => array(
+			'key' => '_billing_apisunat_customer_id',
+		),
+	);
+
 
 	/**
 	 * The ID of this plugin.
@@ -61,6 +79,154 @@ class Apisunat_Admin {
 		add_filter( 'manage_edit-shop_order_columns', array( $this, 'apisunat_custom_order_column' ), 11 );
 		add_action( 'manage_shop_order_posts_custom_column', array( $this, 'apisunat_custom_orders_list_column_content' ), 10, 2 );
 		add_filter( 'plugin_action_links_apisunat/apisunat.php', array( $this, 'apisunat_settings_link' ) );
+		add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'apisunat_editable_order_meta_billing' ) );
+		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'apisunat_save_general_details' ) );
+		add_action( 'woocommerce_new_order', array( $this, 'apisunat_save_metadata_mapping' ), 10, 1 );
+	}
+
+	/**
+	 * Save metadata after create order.
+	 *
+	 * @param $order_id
+	 * @return void
+	 */
+	public function apisunat_save_metadata_mapping( $order_id ) {
+		$metadata = $this->build_meta_data_mapping();
+		update_post_meta( $order_id, '_billing_apisunat_meta_data_mapping', wp_json_encode( $metadata ) );
+	}
+
+	/**
+	 * Update billing metadata
+	 *
+	 * @param WC_Order $order Order data.
+	 * @return void
+	 */
+	public function apisunat_editable_order_meta_billing( WC_Order $order ) {
+
+		// if ( ! $order->meta_exists( '_billing_apisunat_meta_data_mapping' ) ) {
+		// $meta_data_mapping = self::build_meta_data_mapping();
+		// update_post_meta( $order->get_id(), '_billing_apisunat_meta_data_mapping', wp_json_encode( $meta_data_mapping ) );
+		// }
+
+		$meta_temp = $order->get_meta( '_billing_apisunat_meta_data_mapping' );
+
+		$temp = array();
+
+		if ( $meta_temp ) {
+			$temp = json_decode( $meta_temp, true );
+
+		} else {
+			$temp = self::META_DATA_MAPPING;
+		}
+
+		$document_type    = $order->get_meta( $temp['_billing_apisunat_document_type']['key'] );
+		$customer_id_type = $order->get_meta( $temp['_billing_apisunat_customer_id_type']['key'] );
+		$customer_id      = $order->get_meta( $temp['_billing_apisunat_customer_id']['key'] );
+
+		$document_types = array(
+			$temp['_billing_apisunat_document_type']['value_01'] => 'FACTURA',
+			$temp['_billing_apisunat_document_type']['value_03'] => 'BOLETA DE VENTA',
+		);
+
+		$customer_id_types = array(
+			$temp['_billing_apisunat_customer_id_type']['value_6'] => 'RUC',
+			$temp['_billing_apisunat_customer_id_type']['value_1'] => 'DNI',
+			$temp['_billing_apisunat_customer_id_type']['value_7'] => 'PASAPORTE',
+			$temp['_billing_apisunat_customer_id_type']['value_B'] => 'OTROS (Doc. Extranjero)',
+		);
+
+		if ( $order->meta_exists( '_billing_apisunat_meta_data_mapping' ) ) {
+			?>
+
+		<div class="address">
+			<p
+				<?php
+				if ( ! $document_type ) {
+					echo ' class="none_set"'; }
+				?>
+			>
+				<strong>Tipo de Documento:</strong>
+				<?php echo $document_types[ $document_type ] ? esc_html( $document_types[ $document_type ] ) : 'No document type selected.'; ?>
+			</p>
+			<p
+				<?php
+				if ( ! $customer_id_type ) {
+					echo ' class="none_set"'; }
+				?>
+			>
+				<strong>Tipo de Documento: </strong>
+				<?php echo $customer_id_types[ $customer_id_type ] ? esc_html( $customer_id_types[ $customer_id_type ] ) : 'No customer id type selected.'; ?>
+
+			</p>
+			<p
+				<?php
+				if ( ! $customer_id ) {
+					echo ' class="none_set"'; }
+				?>
+			>
+				<strong>Número de Documento:</strong>
+				<?php echo $customer_id ? esc_html( $customer_id ) : 'No customer id'; ?>
+			</p>
+		</div>
+			<?php } ?>
+		<div class="edit_address">
+			<?php
+			woocommerce_wp_select(
+				array(
+					'id'            => '_billing_apisunat_document_type',
+					'label'         => 'Tipo de Identificacion',
+					'wrapper_class' => 'form-field-wide',
+					'value'         => $document_type,
+					'options'       => $document_types,
+				)
+			);
+			woocommerce_wp_select(
+				array(
+					'id'            => '_billing_apisunat_customer_id_type',
+					'label'         => 'Tipo de Documento',
+					'wrapper_class' => 'form-field-wide',
+					'value'         => $customer_id_type,
+					'options'       => $customer_id_types,
+				)
+			);
+			woocommerce_wp_text_input(
+				array(
+					'id'            => '_billing_apisunat_customer_id',
+					'label'         => 'Número de Documento:',
+					'value'         => $customer_id,
+					'wrapper_class' => 'form-field-wide',
+				)
+			);
+			?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Save updated billing metadata.
+	 *
+	 * @param $order_id
+	 * @return void
+	 */
+	public function apisunat_save_general_details( $order_id ) {
+
+		$order = wc_get_order( $order_id );
+
+		$meta_temp = $order->get_meta( '_billing_apisunat_meta_data_mapping' );
+
+		$temp = array();
+
+		if ( $meta_temp ) {
+			$temp = json_decode( $meta_temp, true );
+		} else {
+			$temp = self::META_DATA_MAPPING;
+		}
+
+		update_post_meta( $order_id, $temp['_billing_apisunat_customer_id']['key'], wc_sanitize_textarea( wp_unslash( $_POST['_billing_apisunat_customer_id'] ) ) );
+		update_post_meta( $order_id, $temp['_billing_apisunat_customer_id_type']['key'], wc_clean( wp_unslash( $_POST['_billing_apisunat_customer_id_type'] ) ) );
+		update_post_meta( $order_id, $temp['_billing_apisunat_document_type']['key'], wc_clean( wp_unslash( $_POST['_billing_apisunat_document_type'] ) ) );
+
+		update_post_meta( $order->get_id(), '_billing_apisunat_meta_data_mapping', wp_json_encode( $temp ) );
 	}
 
 	/**
@@ -192,6 +358,20 @@ class Apisunat_Admin {
 		 * Obtener datos de la orden y el tipo de documento
 		 */
 		$order = wc_get_order( $order_idd );
+
+		if ( get_option( 'apisunat_custom_checkout' ) === 'true' ) {
+			$_apisunat_customer_id = get_option( 'apisunat_key_numero_documento' );
+
+			if ( ! $order->meta_exists( $_apisunat_customer_id ) || $order->get_meta( $_apisunat_customer_id ) === '' ) {
+				$order->add_order_note( 'Verifique que exista valores de Numeros de Documentos del cliente' );
+				return;
+			}
+		}
+
+		if ( ! $order->meta_exists( '_billing_apisunat_customer_id' ) || $order->get_meta( '_billing_apisunat_customer_id' ) === '' ) {
+			$order->add_order_note( 'Verifique que exista valores de Numeros de Documentos del cliente' );
+			return;
+		}
 
 		if ( $order->meta_exists( 'apisunat_document_status' ) ) {
 			if ( $order->get_meta( 'apisunat_document_status' ) === 'PENDIENTE' || $order->get_meta( 'apisunat_document_status' ) === 'ACEPTADO' ) {
@@ -900,23 +1080,37 @@ class Apisunat_Admin {
 		$send_data['plugin_data']['debug']            = get_option( 'apisunat_debug_mode' );
 		$send_data['plugin_data']['custom_meta_data'] = get_option( 'apisunat_custom_checkout' );
 
-		$_document_type          = get_option( 'apisunat_key_tipo_comprobante' ) ? get_option( 'apisunat_key_tipo_comprobante' ) : '_billing_apisunat_document_type';
-		$_document_type_value_01 = get_option( 'apisunat_key_value_factura' ) ? get_option( 'apisunat_key_value_factura' ) : '01';
-		$_document_type_value_03 = get_option( 'apisunat_key_value_boleta' ) ? get_option( 'apisunat_key_value_boleta' ) : '03';
+		return $send_data;
+	}
 
-		$send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_document_type'] = array(
+	/**
+	 * Prepare order meta data.
+	 *
+	 * @return array
+	 */
+	public static function build_meta_data_mapping(): array {
+
+		if ( get_option( 'apisunat_custom_checkout' ) === 'false' ) {
+			return self::META_DATA_MAPPING;
+		}
+
+		$_document_type          = get_option( 'apisunat_key_tipo_comprobante' );
+		$_document_type_value_01 = get_option( 'apisunat_key_value_factura' );
+		$_document_type_value_03 = get_option( 'apisunat_key_value_boleta' );
+
+		$meta_data_mapping['_billing_apisunat_document_type'] = array(
 			'key'      => $_document_type,
 			'value_01' => $_document_type_value_01,
 			'value_03' => $_document_type_value_03,
 		);
 
-		$_customer_id_type         = get_option( 'apisunat_key_tipo_documento' ) ? get_option( 'apisunat_key_tipo_documento' ) : '_billing_apisunat_customer_id_type';
-		$_customer_id_type_value_1 = get_option( 'apisunat_key_value_dni' ) ? get_option( 'apisunat_key_value_dni' ) : '1';
-		$_customer_id_type_value_6 = get_option( 'apisunat_key_value_ruc' ) ? get_option( 'apisunat_key_value_ruc' ) : '6';
-		$_customer_id_type_value_7 = get_option( 'apisunat_key_value_pasaporte' ) ? get_option( 'apisunat_key_value_pasaporte' ) : '7';
-		$_customer_id_type_value_b = get_option( 'apisunat_key_value_otros_extranjero' ) ? get_option( 'apisunat_key_value_otros_extranjero' ) : 'B';
+		$_customer_id_type         = get_option( 'apisunat_key_tipo_documento' );
+		$_customer_id_type_value_1 = get_option( 'apisunat_key_value_dni' );
+		$_customer_id_type_value_6 = get_option( 'apisunat_key_value_ruc' );
+		$_customer_id_type_value_7 = get_option( 'apisunat_key_value_pasaporte' );
+		$_customer_id_type_value_b = get_option( 'apisunat_key_value_otros_extranjero' );
 
-		$send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_customer_id_type'] = array(
+		$meta_data_mapping['_billing_apisunat_customer_id_type'] = array(
 			'key'     => $_customer_id_type,
 			'value_1' => $_customer_id_type_value_1,
 			'value_6' => $_customer_id_type_value_6,
@@ -924,13 +1118,13 @@ class Apisunat_Admin {
 			'value_B' => $_customer_id_type_value_b,
 		);
 
-		$_apisunat_customer_id = get_option( 'apisunat_key_numero_documento' ) ? get_option( 'apisunat_key_numero_documento' ) : '_billing_apisunat_customer_id';
+		$_apisunat_customer_id = get_option( 'apisunat_key_numero_documento' );
 
-		$send_data['plugin_data']['meta_data_mapping']['_billing_apisunat_customer_id'] = array(
+		$meta_data_mapping['_billing_apisunat_customer_id'] = array(
 			'key' => $_apisunat_customer_id,
 		);
 
-		return $send_data;
+		return $meta_data_mapping;
 	}
 
 	/**
