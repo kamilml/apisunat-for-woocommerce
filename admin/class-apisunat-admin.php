@@ -102,7 +102,7 @@ class Apisunat_Admin {
 	 * @return void
 	 */
 	public function apisunat_editable_order_meta_billing( WC_Order $order ) {
-        
+
 		$meta_temp = $order->get_meta( '_billing_apisunat_meta_data_mapping' );
 
 		$temp = array();
@@ -354,18 +354,27 @@ class Apisunat_Admin {
 		 */
 		$order = wc_get_order( $order_idd );
 
-		if ( get_option( 'apisunat_custom_checkout' ) === 'true' ) {
-			$_apisunat_customer_id = get_option( 'apisunat_key_numero_documento' );
+		if ( $order->meta_exists( '_billing_apisunat_meta_data_mapping' ) ) {
+
+			$meta_temp = $order->get_meta( '_billing_apisunat_meta_data_mapping' );
+
+			if ( $meta_temp ) {
+				$temp = json_decode( $meta_temp, true );
+			} else {
+				$temp = self::META_DATA_MAPPING;
+			}
+
+			$_apisunat_customer_id = $temp['_billing_apisunat_customer_id']['key'];
 
 			if ( ! $order->meta_exists( $_apisunat_customer_id ) || $order->get_meta( $_apisunat_customer_id ) === '' ) {
 				$order->add_order_note( 'Verifique que exista valores de Numeros de Documentos del cliente' );
 				return;
 			}
-		}
-
-		if ( ! $order->meta_exists( '_billing_apisunat_customer_id' ) || $order->get_meta( '_billing_apisunat_customer_id' ) === '' ) {
-			$order->add_order_note( 'Verifique que exista valores de Numeros de Documentos del cliente' );
-			return;
+		} else {
+			if ( ! $order->meta_exists( '_billing_apisunat_customer_id' ) || $order->get_meta( '_billing_apisunat_customer_id' ) === '' ) {
+				$order->add_order_note( 'Verifique que exista valores de Numeros de Documentos del cliente' );
+				return;
+			}
 		}
 
 		if ( $order->meta_exists( 'apisunat_document_status' ) ) {
