@@ -5,7 +5,9 @@
 		function ($) {
 			const apisunat_modal = document.getElementById( 'apisunatModal' );
 
-			const button_save = document.getElementsByName( "save" )
+			const button_save = document.getElementsByName( "save" );
+
+			const apisunat_reason = document.getElementById( 'apisunat_reason' );
 
 			$( document ).ready(
 				function () {
@@ -80,6 +82,58 @@
 						$( '.regular-text.regular-text-advanced' ).hide();
 						$( '.regular-text.regular-text-advanced' ).attr( 'required', null )
 					}
+				}
+			);
+
+			$( document ).on(
+				"click",
+				"#apisunat_show_anular",
+				function (e) {
+					e.stopImmediatePropagation();
+					e.preventDefault();
+					if (apisunat_reason.style.display === "none") {
+						apisunat_reason.style.display = "block";
+					} else {
+						apisunat_reason.style.display = "none";
+					}
+				}
+			);
+
+			$( document ).on(
+				"click",
+				"#apisunatAnularData",
+				function (e) {
+					e.stopImmediatePropagation();
+					e.preventDefault();
+
+					const trimmed       = $.trim( $( "#apisunat_anular_reason" ).val() );
+					const reason_length = trimmed.length;
+					if (reason_length < 3) {
+						alert( "La razon por la que desea anular debe contener al menos 3 caracteres!" )
+						return false;
+					}
+
+					let orderId = $( '#orderId' ).val();
+
+					$( '#apisunatAnularData' ).hide();
+					$( '#apisunatLoading2' ).show();
+
+					let data = {
+						action: 'void_apisunat_order',
+						order_value: orderId,
+						reason: $( "#apisunat_anular_reason" ).val(),
+					};
+
+					jQuery.post(
+						apisunat_ajax_object.ajax_url,
+						data,
+						async function (response) {
+							window.location = document.location.href;
+							$( '#apisunatLoading2' ).hide();
+							$( '#apisunatAnularData' ).show();
+						}
+					);
+
 				}
 			);
 		}
