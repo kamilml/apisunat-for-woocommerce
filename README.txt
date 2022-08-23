@@ -4,7 +4,7 @@ Donate link: https://apisunat.com/
 Tags: WP, apisunat, facturacion, facturacion electronica, factura, boleta, WooCommerce, CPE, Peru
 Requires at least: 5.8
 Tested up to: 6.0.1
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -74,6 +74,9 @@ Este plugin es gratuito. [APISUNAT.com](https://apisunat.com/) tiene un costo (e
 3. Configuración
 
 == Changelog ==
+
+= 1.2.1 =
+Se agregó la compatibilidad con la elección del formato para el archivo PDF por defecto (A4, A5, ticket58mm o ticket80mm)
 
 = 1.2.0 =
 Se agregaron opciones para anular o corregir comprobantes. Se mejoró la compatibilidad con órdenes de compra creadas sin datos como (RUC, DNI, etc) para poder facturar incluso ventas anteriores.
