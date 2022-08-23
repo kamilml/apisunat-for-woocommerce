@@ -4,12 +4,12 @@ Donate link: https://apisunat.com/
 Tags: WP, apisunat, facturacion, facturacion electronica, factura, boleta, WooCommerce, CPE, Peru
 Requires at least: 5.8
 Tested up to: 6.0.1
-Stable tag: 1.0.8
+Stable tag: 1.2.1
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Emite tus comprobantes electrónicos para SUNAT-PERU directamente desde tu tienda en WooCommerce.
+Emite tus comprobantes electrónicos para SUNAT - PERU directamente desde tu tienda en WooCommerce.
 
 == Description ==
 
@@ -75,6 +75,12 @@ Este plugin es gratuito. [APISUNAT.com](https://apisunat.com/) tiene un costo (e
 
 == Changelog ==
 
+= 1.2.1 =
+Se agregó la compatibilidad con la elección del formato para el archivo PDF por defecto (A4, A5, ticket58mm o ticket80mm)
+
+= 1.2.0 =
+Se agregaron opciones para anular o corregir comprobantes. Se mejoró la compatibilidad con órdenes de compra creadas sin datos como (RUC, DNI, etc) para poder facturar incluso ventas anteriores.
+
 = 1.0.8 =
 Correcciones recomendadas por el equipo de revisión de plugins de wordpress
 
@@ -86,8 +92,11 @@ Primer parche público del plugin. Compatibilidad con otros plugins que modifica
 
 == Upgrade Notice ==
 
-= 1.0.7 =
-IMPORTANTE: Corrección de errores al usar los campos personalizados del checkout.
+= 1.2.0 =
+* Anulación con Nota de Crédito agregada
+* Edición de datos (RUC, DNI, nombre, dirección, etc)
+* Uso del API v1.2
+* Compatibilidad para facturar órdenes creadas sin nuestra metadata
 
 
 `<?php code(); // goes in backticks ?>`
