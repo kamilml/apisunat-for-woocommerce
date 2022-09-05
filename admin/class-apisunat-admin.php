@@ -334,6 +334,7 @@ class Apisunat_Admin {
 	public function apisunat_forma_envio_facturas(): void {
 		if ( get_option( 'apisunat_forma_envio' ) === 'auto' ) {
 			add_action( 'woocommerce_order_status_completed', array( $this, 'send_apisunat_order' ), 10, 1 );
+			add_action( 'woocommerce_payment_complete_order_status_completed', array( $this, 'send_apisunat_order' ), 10, 1 );
 		}
 		add_action( 'wp_ajax_send_apisunat_order', array( $this, 'send_apisunat_order' ), 10, 1 );
 	}
