@@ -283,7 +283,7 @@ class Apisunat_Admin {
 
 				if ( isset( $data['xml'] ) ) {
 					printf(
-						"<a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank' class='button'>PDF</a>",
+						"<a href=https://back.apisunat.com/documents/%s/getPDF/default/%s.pdf target='_blank' class='button'>PDF</a>",
 						esc_attr( get_post_meta( $post_id, 'apisunat_document_id', true ) ),
 						esc_attr( get_post_meta( $post_id, 'apisunat_document_filename', true ) )
 					);
@@ -426,7 +426,7 @@ class Apisunat_Admin {
 					update_post_meta( $order_idd, 'apisunat_document_filename', $apisunat_response['fileName'] );
 
 					$msg = sprintf(
-						"Se emitió la Factura <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>%s</a>",
+						"Se emitió la Factura <a href=https://back.apisunat.com/documents/%s/getPDF/default/%s.pdf target='_blank'>%s</a>",
 						$apisunat_response['documentId'],
 						$apisunat_response['fileName'],
 						$this->split_bills_numbers( $apisunat_response['fileName'] )
@@ -502,7 +502,7 @@ class Apisunat_Admin {
 					delete_post_meta( $order_id, 'apisunat_document_filename' );
 
 					$msg = sprintf(
-						"Se anuló la %s <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>%s</a> con la Nota de Crédito <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'>%s</a>. Motivo: '%s' ",
+						"Se anuló la %s <a href=https://back.apisunat.com/documents/%s/getPDF/default/%s.pdf target='_blank'>%s</a> con la Nota de Crédito <a href=https://back.apisunat.com/documents/%s/getPDF/default/%s.pdf target='_blank'>%s</a>. Motivo: '%s' ",
 						esc_attr( $tipo ),
 						esc_attr( $document_id ),
 						esc_attr( $filename ),
@@ -583,7 +583,7 @@ class Apisunat_Admin {
 
 			if ( $order->meta_exists( 'apisunat_document_id' ) ) {
 				echo sprintf(
-					"<p>Numero %s: <a href=https://back.apisunat.com/documents/%s/getPDF/A4/%s.pdf target='_blank'><strong>%s</strong></a>",
+					"<p>Numero %s: <a href=https://back.apisunat.com/documents/%s/getPDF/default/%s.pdf target='_blank'><strong>%s</strong></a>",
 					esc_attr( $tipo ),
 					esc_attr( $order->get_meta( 'apisunat_document_id' ) ),
 					esc_attr( $order->get_meta( 'apisunat_document_filename' ) ),
