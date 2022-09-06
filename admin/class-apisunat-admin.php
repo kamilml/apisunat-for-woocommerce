@@ -333,10 +333,26 @@ class Apisunat_Admin {
 	 */
 	public function apisunat_forma_envio_facturas(): void {
 		if ( get_option( 'apisunat_forma_envio' ) === 'auto' ) {
-			add_action( 'woocommerce_order_status_completed', array( $this, 'send_apisunat_order' ), 10, 1 );
-			add_action( 'woocommerce_payment_complete_order_status_completed', array( $this, 'send_apisunat_order' ), 10, 1 );
+			// add_action( 'woocommerce_order_status_completed', array( $this, 'send_apisunat_order' ), 10, 1 );
+			add_action( 'woocommerce_order_status_changed', array( $this, 'apisunat_order_status_change' ), 10, 3 );
+
 		}
 		add_action( 'wp_ajax_send_apisunat_order', array( $this, 'send_apisunat_order' ), 10, 1 );
+	}
+
+	/**
+	 * Observe order status change
+	 *
+	 * @param $order_id
+	 * @param $old_status
+	 * @param $new_status
+	 * @return void
+	 * @since    1.0.0
+	 */
+	public function apisunat_order_status_change( $order_id, $old_status, $new_status ) {
+		if ( 'completed' === $new_status ) {
+			$this->send_apisunat_order( $order_id );
+		}
 	}
 
 	/**
