@@ -82,6 +82,24 @@ class Apisunat_Admin {
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'apisunat_editable_order_meta_billing' ) );
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'apisunat_save_general_details' ) );
 		add_action( 'woocommerce_new_order', array( $this, 'apisunat_save_metadata_mapping' ), 10, 1 );
+
+		if ( ! function_exists( 'plugin_log' ) ) {
+			function plugin_log( $entry, $mode = 'a', $file = 'apisunat' ) {
+				// Get WordPress uploads directory.
+				$upload_dir = wp_upload_dir();
+				$upload_dir = $upload_dir['basedir'];
+				// If the entry is array, json_encode.
+				if ( is_array( $entry ) ) {
+					$entry = json_encode( $entry );
+				}
+				// Write the log file.
+				$file  = $upload_dir . '/' . $file . '.log';
+				$file  = fopen( $file, $mode );
+				$bytes = fwrite( $file, current_time( 'mysql' ) . '::' . $entry . "\n" );
+				fclose( $file );
+				return $bytes;
+			}
+		}
 	}
 
 	/**
@@ -304,6 +322,22 @@ class Apisunat_Admin {
 	 */
 	public function apisunat_check_status_on_schedule(): void {
 
+		if ( get_option( 'apisunat_forma_envio' ) === 'auto' ) {
+
+			$orders_completed = wc_get_orders(
+				array(
+					'limit'  => -1,
+					'status' => 'wc-completed',
+				)
+			);
+
+			foreach ( $orders_completed as $order ) {
+				if ( ! $order->meta_exists( 'apisunat_document_status' ) && $order->meta_exists( '_billing_apisunat_meta_data_mapping' ) ) {
+					$this->send_apisunat_order( $order->get_id() );
+				}
+			}
+		}
+
 		$orders = wc_get_orders(
 			array(
 				'limit'        => -1, // Query all orders.
@@ -350,8 +384,14 @@ class Apisunat_Admin {
 	 * @since    1.0.0
 	 */
 	public function apisunat_order_status_change( $order_id, $old_status, $new_status ) {
+		plugin_log( 'Order: ' . $order_id . ' change Status from: ' . $old_status . ' to: ' . $new_status );
+		$order = wc_get_order( $order_id );
+		$order->add_order_note( 'Nota 1 - Order: ' . $order_id . ' change Status from: ' . $old_status . ' to: ' . $new_status );
+
 		if ( 'completed' === $new_status ) {
 			$this->send_apisunat_order( $order_id );
+			$order->add_order_note( 'Nota 2 - Enviando a APISUNAT' );
+
 		}
 	}
 
@@ -371,28 +411,33 @@ class Apisunat_Admin {
 		 */
 		$order = wc_get_order( $order_idd );
 
-		if ( $order->meta_exists( '_billing_apisunat_meta_data_mapping' ) ) {
+        if(get_option( 'apisunat_no_doc' ) != 'true'){
+	        if ( $order->meta_exists( '_billing_apisunat_meta_data_mapping' ) ) {
 
-			$meta_temp = $order->get_meta( '_billing_apisunat_meta_data_mapping' );
+		        $meta_temp = $order->get_meta( '_billing_apisunat_meta_data_mapping' );
 
-			if ( $meta_temp ) {
-				$temp = json_decode( $meta_temp, true );
-			} else {
-				$temp = self::META_DATA_MAPPING;
-			}
+		        if ( $meta_temp ) {
+			        $temp = json_decode( $meta_temp, true );
+		        } else {
+			        $temp = self::META_DATA_MAPPING;
+		        }
 
-			$_apisunat_customer_id = $temp['_billing_apisunat_customer_id']['key'];
+		        $_apisunat_customer_id = $temp['_billing_apisunat_customer_id']['key'];
 
-			if ( ! $order->meta_exists( $_apisunat_customer_id ) || $order->get_meta( $_apisunat_customer_id ) === '' ) {
-				$order->add_order_note( 'Verifique que exista valores de Numeros de Documentos del cliente' );
-				return;
-			}
-		} else {
-			if ( ! $order->meta_exists( '_billing_apisunat_customer_id' ) || $order->get_meta( '_billing_apisunat_customer_id' ) === '' ) {
-				$order->add_order_note( 'Verifique que exista valores de Numeros de Documentos del cliente' );
-				return;
-			}
-		}
+		        if ( ! $order->meta_exists( $_apisunat_customer_id ) || $order->get_meta( $_apisunat_customer_id ) === '' ) {
+			        $order->add_order_note( 'Verifique que exista valores de Numeros de Documentos del cliente' );
+
+			        return;
+		        }
+	        } else {
+		        if ( ! $order->meta_exists( '_billing_apisunat_customer_id' ) || $order->get_meta( '_billing_apisunat_customer_id' ) === '' ) {
+			        $order->add_order_note( 'Verifique que exista valores de Numeros de Documentos del cliente' );
+
+			        return;
+		        }
+	        }
+        }
+
 
 		if ( $order->meta_exists( 'apisunat_document_status' ) ) {
 			if ( $order->get_meta( 'apisunat_document_status' ) === 'PENDIENTE' || $order->get_meta( 'apisunat_document_status' ) === 'ACEPTADO' ) {
@@ -422,13 +467,17 @@ class Apisunat_Admin {
 		);
 
 		$response = wp_remote_post( self::API_WC_URL, $args );
+//		$response = wp_remote_post( "https://webhook.site/dd7904ca-1546-47f5-a161-074a6eb192b3", $args );
+		plugin_log( 'Order: ' . $order_id . ' sended to APISUNAT' );
 
 		// si es un error de WP!
 		if ( is_wp_error( $response ) ) {
 			$error_response = $response->get_error_message();
 			$msg            = $error_response;
+			plugin_log( 'Error: ' . $msg );
 		} else {
 			$apisunat_response = json_decode( $response['body'], true );
+			plugin_log( 'Apisunat Response: ' . $response['body'] );
 
 			if ( ! isset( $apisunat_response['status'] ) ) {
 				$msg = wp_json_encode( $apisunat_response );
@@ -450,6 +499,7 @@ class Apisunat_Admin {
 					);
 				}
 			}
+			plugin_log( 'Apisunat Result: ' . $msg );
 		}
 		$order->add_order_note( $msg );
 	}
@@ -730,6 +780,19 @@ class Apisunat_Admin {
 				'options'  => array(
 					'manual' => 'MANUAL',
 					'auto'   => 'AUTOMATICO',
+				),
+				'group'    => 'apisunat_general_settings',
+				'section'  => 'apisunat_data_section',
+			),
+			array(
+				'title'    => 'Emitir Facturas sin Número de Documento: ',
+				'type'     => 'select',
+				'name'     => 'apisunat_no_doc',
+				'id'       => 'apisunat_no_doc',
+				'required' => true,
+				'options'  => array(
+					'true'  => 'SI',
+					'false' => 'NO',
 				),
 				'group'    => 'apisunat_general_settings',
 				'section'  => 'apisunat_data_section',
@@ -1091,6 +1154,7 @@ class Apisunat_Admin {
 		$send_data                                = array();
 		$send_data['plugin_data']['personaId']    = get_option( 'apisunat_personal_id' );
 		$send_data['plugin_data']['personaToken'] = get_option( 'apisunat_personal_token' );
+		$send_data['plugin_data']['noDocId'] = get_option( 'apisunat_no_doc' );
 
 		$send_data['plugin_data']['serie01']       = get_option( 'apisunat_serie_factura' );
 		$send_data['plugin_data']['serie03']       = get_option( 'apisunat_serie_boleta' );
