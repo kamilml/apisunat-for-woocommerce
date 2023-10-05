@@ -295,21 +295,26 @@ class Apisunat_Admin {
 
 			if ( in_array( $status, $estados, true ) ) {
 				echo esc_attr( $status );
+				
+				if ( "ERROR" === $status || "EXCEPCION" === $status){
+					echo "&nbsp;";
+					$this->boton_emitir( $order->get_id(), $order->get_status() );
+				}
 			} else {
-				$request = wp_remote_get( self::API_URL . '/documents/' . $doc_id . '/getById' );
-				$data    = json_decode( wp_remote_retrieve_body( $request ), true );
+				// $request = wp_remote_get( self::API_URL . '/documents/' . $doc_id . '/getById' );
+				// $data    = json_decode( wp_remote_retrieve_body( $request ), true );
 
-				if ( isset( $data['xml'] ) ) {
+				 if ( $doc_id ) {
 					printf(
 						"<a href=https://back.apisunat.com/documents/%s/getPDF/default/%s.pdf target='_blank' class='button'>PDF</a>",
 						esc_attr( get_post_meta( $post_id, 'apisunat_document_id', true ) ),
 						esc_attr( get_post_meta( $post_id, 'apisunat_document_filename', true ) )
 					);
-					printf(
-						" <a href=%s target=_blank' class='button'>XML</a>",
-						esc_attr( $data['xml'] )
-					);
-				}
+					// printf(
+					// 	" <a href=%s target=_blank' class='button'>XML</a>",
+					// 	esc_attr( $data['xml'] )
+					// );
+				 }
 			}
 		}
 	}
