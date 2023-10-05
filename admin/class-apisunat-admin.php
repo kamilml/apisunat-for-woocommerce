@@ -82,6 +82,8 @@ class Apisunat_Admin {
 		add_action( 'woocommerce_admin_order_data_after_billing_address', array( $this, 'apisunat_editable_order_meta_billing' ) );
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'apisunat_save_general_details' ) );
 		add_action( 'woocommerce_new_order', array( $this, 'apisunat_save_metadata_mapping' ), 10, 1 );
+		add_filter( 'bulk_actions-edit-shop_order', array( $this, 'apisunat_bulk_actions' ) );
+		add_filter( 'handle_bulk_actions-edit-shop_order', array( $this, 'apisunat_bulk_action_handler' ), 10, 3 );
 
 		if ( ! function_exists( 'plugin_log' ) ) {
 			function plugin_log( $entry, $mode = 'a', $file = 'apisunat' ) {
@@ -100,6 +102,28 @@ class Apisunat_Admin {
 				return $bytes;
 			}
 		}
+	}
+
+	public function apisunat_bulk_actions(){
+		$actions['emit_apisunat']      = __( 'Emitir CPE' );
+		return $actions;
+	}
+
+	public function apisunat_bulk_action_handler( $redirect_to, $action, $post_ids ){
+		if( 'emit_apisunat' !== $action ){
+			return $redirect_to;
+		}
+		foreach ( $post_ids as $post_id ) {
+			$this->send_apisunat_order( $post_id );
+		}
+
+		return add_query_arg(
+			array(
+				'processed_count' => count( $post_ids ),
+			),
+			$redirect_to
+		);
+
 	}
 
 	/**
