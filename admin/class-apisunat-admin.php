@@ -87,7 +87,11 @@ class Apisunat_Admin
 		add_action('woocommerce_new_order', array($this, 'apisunat_save_metadata_mapping'), 10, 1);
 		add_filter('bulk_actions-edit-shop_order', array($this, 'apisunat_bulk_actions'));
 		add_filter('handle_bulk_actions-edit-shop_order', array($this, 'apisunat_bulk_action_handler'), 10, 3);
-		add_action('admin_notices', array( $this,'apisunat_bulk_action_handler_admin_notice' ) );
+		add_action('admin_notices', array($this, 'apisunat_bulk_action_handler_admin_notice'));
+
+		add_filter('views_edit-shop_order', array($this, 'custom_order_views') );
+		// Aplicar el filtro cuando se procesa la consulta
+		add_filter('parse_query', array( $this, 'apply_custom_filter' ) );
 
 		if (!function_exists('plugin_log')) {
 			function plugin_log($entry, $mode = 'a', $file = 'apisunat')
@@ -125,10 +129,9 @@ class Apisunat_Admin
 		foreach ($post_ids as $post_id) {
 			$order = wc_get_order($post_id);
 			if ("completed" === $order->get_data()["status"]) {
-				$this->send_apisunat_order( $post_id );
+				$this->send_apisunat_order($post_id);
 				$proccessed++;
 			}
-			
 		}
 
 		return add_query_arg(
@@ -139,7 +142,7 @@ class Apisunat_Admin
 		);
 	}
 
-	function apisunat_bulk_action_handler_admin_notice()
+	public function apisunat_bulk_action_handler_admin_notice()
 	{
 		if (empty($_REQUEST['processed_count'])) return; // Exit
 
@@ -153,6 +156,43 @@ class Apisunat_Admin
 				'write_downloads'
 			) . '</p></div>', $count);
 	}
+
+	public function custom_order_views($views)
+	{
+		$completed_count = $this->count_orders_without_status_meta();
+
+		$views['completed_nocpe'] = '<a href="edit.php?post_type=shop_order&custom_filter=completed" class="' . (isset($_GET['custom_filter']) && $_GET['custom_filter'] === 'completed' ? 'current' : '') . '">' . esc_html__('Completados sin CPE') . ' (' . $completed_count . ')</a>';
+
+		return $views;
+	}
+
+	public function count_orders_without_status_meta()
+	{
+		$orders = wc_get_orders(array(
+			'limit'        => -1,
+			'meta_key'     => 'apisunat_document_status', 
+			'meta_compare' => 'NOT EXISTS', 
+		));
+
+		return count($orders);
+	}
+
+	public function apply_custom_filter($query)
+	{
+		global $typenow;
+
+		if ($typenow == 'shop_order' && isset($_GET['custom_filter']) && $_GET['custom_filter'] == 'completed') {
+			// Agregar la condición para órdenes completadas sin la meta apisunat_document_status
+			$query->query_vars['meta_query'] = array(
+				array(
+					'key'     => 'apisunat_document_status',
+					'compare' => 'NOT EXISTS',
+				),
+			);
+		}
+	}
+
+
 
 	/**
 	 * Save metadata after create order.
