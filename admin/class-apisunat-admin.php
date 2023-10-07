@@ -89,9 +89,10 @@ class Apisunat_Admin
 		add_filter('handle_bulk_actions-edit-shop_order', array($this, 'apisunat_bulk_action_handler'), 10, 3);
 		add_action('admin_notices', array($this, 'apisunat_bulk_action_handler_admin_notice'));
 
-		add_filter('views_edit-shop_order', array($this, 'custom_order_views') );
+		add_filter('views_edit-shop_order', array($this, 'custom_order_views'));
 		// Aplicar el filtro cuando se procesa la consulta
-		add_filter('parse_query', array( $this, 'apply_custom_filter' ) );
+		add_filter('parse_query', array($this, 'apply_custom_filter'));
+		add_action('updated_option', array($this, 'obtener_fecha_al_guardar_forma_envio'), 10, 3);
 
 		if (!function_exists('plugin_log')) {
 			function plugin_log($entry, $mode = 'a', $file = 'apisunat')
@@ -109,6 +110,20 @@ class Apisunat_Admin
 				$bytes = fwrite($file, current_time('mysql') . '::' . $entry . "\n");
 				fclose($file);
 				return $bytes;
+			}
+		}
+	}
+
+	function obtener_fecha_al_guardar_forma_envio($option_name, $old_value, $new_value)
+	{
+		global $wpdb;
+
+		if ('apisunat_forma_envio' === $option_name) {
+			$fecha_actual = current_time('mysql');
+
+			if ('auto' === $new_value) {
+				plugin_log($fecha_actual);
+				update_option('apisunat_fecha', $fecha_actual);
 			}
 		}
 	}
@@ -170,8 +185,8 @@ class Apisunat_Admin
 	{
 		$orders = wc_get_orders(array(
 			'limit'        => -1,
-			'meta_key'     => 'apisunat_document_status', 
-			'meta_compare' => 'NOT EXISTS', 
+			'meta_key'     => 'apisunat_document_status',
+			'meta_compare' => 'NOT EXISTS',
 		));
 
 		return count($orders);
@@ -424,10 +439,17 @@ class Apisunat_Admin
 
 		if (get_option('apisunat_forma_envio') === 'auto') {
 
+			$fecha_limite = strtotime(get_option('apisunat_fecha'));
+
 			$orders_completed = wc_get_orders(
 				array(
-					'limit'  => -1,
+					'limit'  => 100,
 					'status' => 'wc-completed',
+					'date_query' => array(
+						array(
+							'after' => date('Y-m-d H:i:s', $fecha_limite), // Formatea la fecha límite.
+						),
+					),
 				)
 			);
 
@@ -900,8 +922,8 @@ class Apisunat_Admin
 				'id'       => 'apisunat_no_doc',
 				'required' => true,
 				'options'  => array(
-					'true'  => 'SI',
 					'false' => 'NO',
+					'true'  => 'SI',
 				),
 				'group'    => 'apisunat_general_settings',
 				'section'  => 'apisunat_data_section',
@@ -1148,7 +1170,7 @@ class Apisunat_Admin
 	?>
 		<h4>Los datos de acceso se obtienen al crear una empresa en <a href="https://apisunat.com/" target="_blank" rel="noopener">APISUNAT.com</a></h4>
 		<!-- <hr> -->
-	<?php
+<?php
 	}
 
 	/**
@@ -1159,10 +1181,14 @@ class Apisunat_Admin
 	 */
 	public function apisunat_display_data(): void
 	{
-	?>
-		<hr>
-		<h3>Configuración</h3>
-	<?php
+		echo '<hr>';
+		echo '<h3>Configuración</h3>';
+
+		$ultimo_cambio = get_option('apisunat_fecha');
+		if ($ultimo_cambio) {
+			$fecha_formateada = date('d/m/Y H:i:s', strtotime($ultimo_cambio));
+			echo '<small>El último cambio a automático se realizó el: ' . $fecha_formateada . '</small>';
+		}
 	}
 
 	/**
@@ -1173,10 +1199,8 @@ class Apisunat_Admin
 	 */
 	public function apisunat_display_advanced(): void
 	{
-	?>
-		<hr>
-		<h3>Configuración avanzada</h3>
-<?php
+		echo '<hr>';
+		echo '<h3>Configuración</h3>';
 	}
 
 	/**
@@ -1211,7 +1235,7 @@ class Apisunat_Admin
 				$items  = $args['options'];
 				echo sprintf('<select id="%s" name="%s">', esc_attr($args['id']), esc_attr($args['id']));
 				foreach ($items as $key => $item) {
-					$selected = ($option === $key) ? 'selected="selected"' : '';
+					$selected = ($option == $key) ? 'selected' : '';
 					echo sprintf("<option value='%s' %s>%s</option>", esc_attr($key), esc_attr($selected), esc_attr($item));
 				}
 				echo '</select>';
