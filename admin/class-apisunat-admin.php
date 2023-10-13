@@ -187,6 +187,7 @@ class Apisunat_Admin
 			'limit'        => -1,
 			'meta_key'     => 'apisunat_document_status',
 			'meta_compare' => 'NOT EXISTS',
+			'status' => 'wc-completed',
 		));
 
 		return count($orders);
@@ -204,6 +205,7 @@ class Apisunat_Admin
 					'compare' => 'NOT EXISTS',
 				),
 			);
+			$query->set('post_status', 'wc-completed');
 		}
 	}
 
@@ -450,11 +452,13 @@ class Apisunat_Admin
 							'after' => date('Y-m-d H:i:s', $fecha_limite), // Formatea la fecha límite.
 						),
 					),
+					'meta_key'     => 'apisunat_document_status',
+					'meta_compare' => 'NOT EXISTS',
 				)
 			);
 
 			foreach ($orders_completed as $order) {
-				if (!$order->meta_exists('apisunat_document_status') && $order->meta_exists('_billing_apisunat_meta_data_mapping')) {
+				if ( $order->meta_exists('_billing_apisunat_meta_data_mapping')) {
 					$this->send_apisunat_order($order->get_id());
 				}
 			}
