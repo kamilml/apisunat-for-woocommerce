@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Fired during plugin deactivation
  *
@@ -28,8 +29,11 @@ class Apisunat_Deactivator {
 	 */
 	public static function deactivate(): void {
 
-		$timestamp = wp_next_scheduled( 'apisunat_five_minutes_event' );
-		wp_unschedule_event( $timestamp, 'apisunat_five_minutes_event' );
-	}
+		$event_names = array('apisunat_five_minutes_event', 'apisunat_one_minute_event');
 
+		foreach ($event_names as $event_name) {
+			$timestamp = wp_next_scheduled($event_name);
+			wp_unschedule_event($timestamp, $event_name);
+		}
+	}
 }

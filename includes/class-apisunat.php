@@ -155,7 +155,7 @@ class Apisunat {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-		$this->loader->add_action( 'apisunat_five_minutes_event', $plugin_admin, 'apisunat_check_status_on_schedule' );
+		$this->loader->add_action( 'apisunat_one_minute_event', $plugin_admin, 'apisunat_check_status_on_schedule' );
 
 	}
 
