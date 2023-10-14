@@ -97,19 +97,19 @@ class Apisunat_Admin
 		if (!function_exists('plugin_log')) {
 			function plugin_log($entry, $mode = 'a', $file = 'apisunat')
 			{
-				// Get WordPress uploads directory.
-				$upload_dir = wp_upload_dir();
-				$upload_dir = $upload_dir['basedir'];
-				// If the entry is array, json_encode.
-				if (is_array($entry)) {
-					$entry = json_encode($entry);
-				}
-				// Write the log file.
-				$file  = $upload_dir . '/' . $file . '.log';
-				$file  = fopen($file, $mode);
-				$bytes = fwrite($file, current_time('mysql') . '::' . $entry . "\n");
-				fclose($file);
-				return $bytes;
+				// // Get WordPress uploads directory.
+				// $upload_dir = wp_upload_dir();
+				// $upload_dir = $upload_dir['basedir'];
+				// // If the entry is array, json_encode.
+				// if (is_array($entry)) {
+				// 	$entry = json_encode($entry);
+				// }
+				// // Write the log file.
+				// $file  = $upload_dir . '/' . $file . '.log';
+				// $file  = fopen($file, $mode);
+				// $bytes = fwrite($file, current_time('mysql') . '::' . $entry . "\n");
+				// fclose($file);
+				// return $bytes;
 			}
 		}
 	}
@@ -174,24 +174,25 @@ class Apisunat_Admin
 
 	public function custom_order_views($views)
 	{
-		$completed_count = $this->count_orders_without_status_meta();
+		// $completed_count = $this->count_orders_without_status_meta();
 
-		$views['completed_nocpe'] = '<a href="edit.php?post_type=shop_order&custom_filter=completed" class="' . (isset($_GET['custom_filter']) && $_GET['custom_filter'] === 'completed' ? 'current' : '') . '">' . esc_html__('Completados sin CPE') . ' (' . $completed_count . ')</a>';
+		// $views['completed_nocpe'] = '<a href="edit.php?post_type=shop_order&custom_filter=completed" class="' . (isset($_GET['custom_filter']) && $_GET['custom_filter'] === 'completed' ? 'current' : '') . '">' . esc_html__('Completados sin CPE') . ' (' . $completed_count . ')</a>';
+		$views['completed_nocpe'] = '<a href="edit.php?post_type=shop_order&custom_filter=completed" class="' . (isset($_GET['custom_filter']) && $_GET['custom_filter'] === 'completed' ? 'current' : '') . '">' . esc_html__('Completados sin CPE') . '</a>';
 
 		return $views;
 	}
 
-	public function count_orders_without_status_meta()
-	{
-		$orders = wc_get_orders(array(
-			'limit'        => -1,
-			'meta_key'     => 'apisunat_document_status',
-			'meta_compare' => 'NOT EXISTS',
-			'status' => 'wc-completed',
-		));
+	// public function count_orders_without_status_meta()
+	// {
+	// 	$orders = wc_get_orders(array(
+	// 		'limit'        => -1,
+	// 		'meta_key'     => 'apisunat_document_status',
+	// 		'meta_compare' => 'NOT EXISTS',
+	// 		'status' => 'wc-completed',
+	// 	));
 
-		return count($orders);
-	}
+	// 	return count($orders);
+	// }
 
 	public function apply_custom_filter($query)
 	{
@@ -200,9 +201,15 @@ class Apisunat_Admin
 		if ($typenow == 'shop_order' && isset($_GET['custom_filter']) && $_GET['custom_filter'] == 'completed') {
 			// Agregar la condición para órdenes completadas sin la meta apisunat_document_status
 			$query->query_vars['meta_query'] = array(
+				'relation' => 'OR',
 				array(
 					'key'     => 'apisunat_document_status',
 					'compare' => 'NOT EXISTS',
+				),
+				array(
+					'key'     => 'apisunat_document_status',
+					'value'     => array('ACEPTADO', 'PENDIENTE'),
+					'compare' => 'NOT IN',
 				),
 			);
 			$query->set('post_status', 'wc-completed');
