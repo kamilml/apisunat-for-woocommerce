@@ -996,6 +996,7 @@ class Apisunat_Admin
 				'options'  => array(
 					'10' => 'GRAVADO',
 					'20' => 'EXONERADO',
+					'30' => 'INAFECTO',
 				),
 				'group'    => 'apisunat_general_settings',
 				'section'  => 'apisunat_data_section',
