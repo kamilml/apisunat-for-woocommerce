@@ -27,9 +27,9 @@ class Apisunat_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate(): void {
-		if ( ! wp_next_scheduled( 'apisunat_five_minutes_event' ) ) {
-			wp_schedule_event( time(), 'wp_1_wc_regenerate_images_cron_interval', 'apisunat_five_minutes_event' );
-		}
+		// if ( ! wp_next_scheduled( 'apisunat_five_minutes_event' ) ) {
+		// 	wp_schedule_event( time(), 'wp_1_wc_regenerate_images_cron_interval', 'apisunat_five_minutes_event' );
+		// }
 
 		if ( ! wp_next_scheduled( 'apisunat_one_minute_event' ) ) {
 			wp_schedule_event( time(), 'every_minute', 'apisunat_one_minute_event' );
