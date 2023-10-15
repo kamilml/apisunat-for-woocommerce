@@ -448,6 +448,10 @@ class Apisunat_Admin
 
 		if (get_option('apisunat_forma_envio') === 'auto') {
 
+			if (!get_option('apisunat_fecha')) {
+				update_option('apisunat_fecha', current_time('mysql'));
+			}
+
 			$fecha_limite = strtotime(get_option('apisunat_fecha'));
 
 			$orders_completed = wc_get_orders(
@@ -468,7 +472,7 @@ class Apisunat_Admin
 			);
 
 			foreach ($orders_completed as $order) {
-				if ( $order->meta_exists('_billing_apisunat_meta_data_mapping')) {
+				if ($order->meta_exists('_billing_apisunat_meta_data_mapping')) {
 					$this->send_apisunat_order($order->get_id());
 				}
 			}
