@@ -1085,7 +1085,7 @@ class Apisunat_Admin
 				'type'     => 'input',
 				'name'     => 'apisunat_logtail_token',
 				'id'       => 'apisunat_logtail_token',
-				'required' => true,
+				'required' => false,
 				'class'    => 'regular-text',
 				'group'    => 'apisunat_general_settings',
 				'section'  => 'apisunat_advanced_section',
