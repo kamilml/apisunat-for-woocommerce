@@ -938,7 +938,7 @@ class Apisunat_Admin
 
 		$args = array(
 			array(
-				'title'    => 'personalId: ',
+				'title'    => 'personaId: ',
 				'type'     => 'input',
 				'id'       => 'apisunat_personal_id',
 				'name'     => 'apisunat_personal_id',
@@ -948,7 +948,7 @@ class Apisunat_Admin
 				'section'  => 'apisunat_general_section',
 			),
 			array(
-				'title'    => 'personalToken: ',
+				'title'    => 'personaToken: ',
 				'type'     => 'input',
 				'id'       => 'apisunat_personal_token',
 				'name'     => 'apisunat_personal_token',
@@ -972,7 +972,7 @@ class Apisunat_Admin
 				'section'  => 'apisunat_data_section',
 			),
 			array(
-				'title'    => 'Emitir Facturas sin Número de Documento: ',
+				'title'    => 'Emitir CPE sin datos del comprador: ',
 				'type'     => 'select',
 				'name'     => 'apisunat_no_doc',
 				'id'       => 'apisunat_no_doc',

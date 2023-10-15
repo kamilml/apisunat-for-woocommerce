@@ -4,7 +4,7 @@ Donate link: https://apisunat.com/
 Tags: WP, apisunat, facturacion, facturacion electronica, factura, boleta, WooCommerce, CPE, Peru
 Requires at least: 5.8
 Tested up to: 6.3.2
-Stable tag: 1.2.1
+Stable tag: 1.3.14
 Requires PHP: 7.4
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -74,6 +74,16 @@ Este plugin es gratuito. [APISUNAT.com](https://apisunat.com/) tiene un costo (e
 3. Configuración
 
 == Changelog ==
+
+= 1.3.14 =
+(1.3.1 - 1.3.14) Correcciones en el envío automático, envío masivo, inputs de configuración fallando, mal uso de queries con filtros y data innecesaria, limpiando logs, etc
+
+= 1.3.0 =
+* Se agregó la compatibilidad de envío automático con algunas pasarelas de pago con tarjeta
+* Se agregó la opción de emitir sin datos del comprador (se generan como Boletas SIN DOCUMENTO)
+* Se agregó la opción de Emitir CPE masivamente
+* Se agregó la opción para OPERACION INAFECTA
+* Se agregó Logtail para los logs
 
 = 1.2.1 =
 Se agregó la compatibilidad con la elección del formato para el archivo PDF por defecto (A4, A5, ticket58mm o ticket80mm)
