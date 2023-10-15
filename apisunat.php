@@ -15,7 +15,7 @@
  * Plugin Name:       APISUNAT - Facturación Electrónica
  * Plugin URI:        https://github.com/kamilml/apisunat-for-woocommerce
  * Description:       Emite tus comprobantes electrónicos para SUNAT-PERU directamente desde tu tienda en WooCommerce.
- * Version:           1.3.14
+ * Version:           1.3.15
  * Author:            APISUNAT
  * Author URI:        https://apisunat.com/
  * License:           GPLv3 or later
