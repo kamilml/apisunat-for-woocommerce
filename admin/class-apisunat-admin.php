@@ -95,7 +95,7 @@ class Apisunat_Admin
 		add_action('updated_option', array($this, 'obtener_fecha_al_guardar_forma_envio'), 10, 3);
 
 		if (!function_exists('plugin_log')) {
-			function plugin_log($entry, $mode = 'a', $file = 'apisunat')
+			function plugin_log($message)
 			{
 				// // Get WordPress uploads directory.
 				// $upload_dir = wp_upload_dir();
@@ -110,6 +110,38 @@ class Apisunat_Admin
 				// $bytes = fwrite($file, current_time('mysql') . '::' . $entry . "\n");
 				// fclose($file);
 				// return $bytes;
+
+				if(get_option('apisunat_logtail_token')){
+
+					$url = 'https://in.logs.betterstack.com';
+
+				$data = array(
+					'message' => $message
+				);
+
+				$curl_options = array(
+					CURLOPT_URL            => $url,
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_TIMEOUT        => 30,
+					CURLOPT_CUSTOMREQUEST  => 'POST',
+					CURLOPT_HTTPHEADER     => array(
+						'Content-Type: application/json',
+						'Authorization: Bearer '. get_option('apisunat_logtail_token')
+					),
+					CURLOPT_POSTFIELDS      => json_encode($data),
+					CURLOPT_SSL_VERIFYPEER => false, // Si deseas desactivar la verificación SSL
+				);
+				$curl = curl_init();
+				curl_setopt_array($curl, $curl_options);
+				$response = curl_exec($curl);
+				if (curl_errno($curl)) {
+
+				}
+				curl_close($curl);
+				}
+
+				
+
 			}
 		}
 	}
@@ -122,7 +154,7 @@ class Apisunat_Admin
 			$fecha_actual = current_time('mysql');
 
 			if ('auto' === $new_value) {
-				plugin_log($fecha_actual);
+				plugin_log("Registro de fecha cambio a automatico: ". $fecha_actual);
 				update_option('apisunat_fecha', $fecha_actual);
 			}
 		}
@@ -470,7 +502,9 @@ class Apisunat_Admin
 
 			foreach ($orders_completed as $order) {
 				if ($order->meta_exists('_billing_apisunat_meta_data_mapping')) {
+					plugin_log("Sending order: ". $order->get_id());
 					$this->send_apisunat_order($order->get_id());
+					
 				}
 			}
 		}
@@ -1042,6 +1076,17 @@ class Apisunat_Admin
 					'false' => 'NO',
 					'true'  => 'SI',
 				),
+				'group'    => 'apisunat_general_settings',
+				'section'  => 'apisunat_advanced_section',
+			),
+
+			array(
+				'title'    => 'Logtail token: ',
+				'type'     => 'input',
+				'name'     => 'apisunat_logtail_token',
+				'id'       => 'apisunat_logtail_token',
+				'required' => true,
+				'class'    => 'regular-text',
 				'group'    => 'apisunat_general_settings',
 				'section'  => 'apisunat_advanced_section',
 			),
