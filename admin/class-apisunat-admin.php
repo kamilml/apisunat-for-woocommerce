@@ -115,29 +115,30 @@ class Apisunat_Admin
 
 					$url = 'https://in.logs.betterstack.com';
 
-				$data = array(
-					'message' => $message
-				);
+					$data = array(
+						'message' => $message
+					);
 
-				$curl_options = array(
-					CURLOPT_URL            => $url,
-					CURLOPT_RETURNTRANSFER => true,
-					CURLOPT_TIMEOUT        => 30,
-					CURLOPT_CUSTOMREQUEST  => 'POST',
-					CURLOPT_HTTPHEADER     => array(
-						'Content-Type: application/json',
-						'Authorization: Bearer '. get_option('apisunat_logtail_token')
-					),
-					CURLOPT_POSTFIELDS      => json_encode($data),
-					CURLOPT_SSL_VERIFYPEER => false, // Si deseas desactivar la verificación SSL
-				);
-				$curl = curl_init();
-				curl_setopt_array($curl, $curl_options);
-				$response = curl_exec($curl);
-				if (curl_errno($curl)) {
+					$curl_options = array(
+						CURLOPT_URL            => $url,
+						CURLOPT_RETURNTRANSFER => true,
+						CURLOPT_TIMEOUT        => 30,
+						CURLOPT_CUSTOMREQUEST  => 'POST',
+						CURLOPT_HTTPHEADER     => array(
+							'Content-Type: application/json',
+							'Authorization: Bearer '. get_option('apisunat_logtail_token')
+						),
+						CURLOPT_POSTFIELDS      => json_encode($data),
+						CURLOPT_SSL_VERIFYPEER => false, // Si deseas desactivar la verificación SSL
+					);
 
-				}
-				curl_close($curl);
+					$curl = curl_init();
+					curl_setopt_array($curl, $curl_options);
+					$response = curl_exec($curl);
+
+					if (curl_errno($curl)) {
+					}
+					curl_close($curl);
 				}
 
 				
@@ -484,7 +485,7 @@ class Apisunat_Admin
 				update_option('apisunat_fecha', current_time('mysql'));
 			}
 
-			$fecha_limite = strtotime(get_option('apisunat_fecha'));
+			$fecha_limite = get_option('apisunat_fecha');
 
 			$orders_completed = wc_get_orders(
 				array(
@@ -502,10 +503,13 @@ class Apisunat_Admin
 					'meta_compare' => 'NOT EXISTS',
 				)
 			);
+			plugin_log($fecha_limite . ' FECHA LIMITE / Ejecutando apisunat_check_status_on_schedule ' . count($orders_completed) . ' órdenes');
 
 			foreach ($orders_completed as $order) {
+				plugin_log("orders_completed foreach: ". $order->get_id());
+
 				if ($order->meta_exists('_billing_apisunat_meta_data_mapping')) {
-					plugin_log("Sending order: ". $order->get_id());
+					plugin_log("send_apisunat_order: ". $order->get_id());
 					$this->send_apisunat_order($order->get_id());
 					
 				}
@@ -643,7 +647,7 @@ class Apisunat_Admin
 
 		$response = wp_remote_post(self::API_WC_URL, $args);
 		//		$response = wp_remote_post( "https://webhook.site/dd7904ca-1546-47f5-a161-074a6eb192b3", $args );
-		plugin_log('Order: ' . $order_id . ' sended to APISUNAT');
+		// plugin_log('Order: ' . $order_id . ' sended to APISUNAT');
 
 		// si es un error de WP!
 		if (is_wp_error($response)) {
@@ -652,7 +656,7 @@ class Apisunat_Admin
 			plugin_log('Error: ' . $msg);
 		} else {
 			$apisunat_response = json_decode($response['body'], true);
-			plugin_log('Apisunat Response: ' . $response['body']);
+			// plugin_log('Apisunat Response: ' . $response['body']);
 
 			if (!isset($apisunat_response['status'])) {
 				$msg = wp_json_encode($apisunat_response);
@@ -667,14 +671,14 @@ class Apisunat_Admin
 					update_post_meta($order_idd, 'apisunat_document_filename', $apisunat_response['fileName']);
 
 					$msg = sprintf(
-						"Se emitió la Factura <a href=https://back.apisunat.com/documents/%s/getPDF/default/%s.pdf target='_blank'>%s</a>",
+						"Se emitió el CPE <a href=https://back.apisunat.com/documents/%s/getPDF/default/%s.pdf target='_blank'>%s</a>",
 						$apisunat_response['documentId'],
 						$apisunat_response['fileName'],
 						$this->split_bills_numbers($apisunat_response['fileName'])
 					);
 				}
 			}
-			plugin_log('Apisunat Result: ' . $msg);
+			// plugin_log('Apisunat Result: ' . $msg);
 		}
 		$order->add_order_note($msg);
 	}
@@ -1088,7 +1092,7 @@ class Apisunat_Admin
 				'type'     => 'input',
 				'name'     => 'apisunat_logtail_token',
 				'id'       => 'apisunat_logtail_token',
-				'required' => true,
+				'required' => false,
 				'class'    => 'regular-text',
 				'group'    => 'apisunat_general_settings',
 				'section'  => 'apisunat_advanced_section',
