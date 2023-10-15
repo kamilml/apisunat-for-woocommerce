@@ -153,6 +153,16 @@ class Apisunat {
 
 		$plugin_admin = new Apisunat_Admin( $this->get_plugin_name(), $this->get_version() );
 
+		function agregar_intervalo_cron_personalizado($schedules) {
+			$schedules['apisunat_every_one_minute'] = array(
+				'interval' => 60,
+				'display' => 'Cada 1 minuto',
+			);
+			return $schedules;
+		}
+		
+		add_filter('cron_schedules', 'agregar_intervalo_cron_personalizado');
+
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'apisunat_one_minute_event', $plugin_admin, 'apisunat_check_status_on_schedule' );

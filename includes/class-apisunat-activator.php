@@ -31,8 +31,10 @@ class Apisunat_Activator {
 		// 	wp_schedule_event( time(), 'wp_1_wc_regenerate_images_cron_interval', 'apisunat_five_minutes_event' );
 		// }
 
+		
+
 		if ( ! wp_next_scheduled( 'apisunat_one_minute_event' ) ) {
-			wp_schedule_event( time(), 'every_minute', 'apisunat_one_minute_event' );
+			wp_schedule_event( time(), 'apisunat_every_one_minute', 'apisunat_one_minute_event' );
 		}
 	}
 }
