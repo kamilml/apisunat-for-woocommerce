@@ -3,7 +3,7 @@ Contributors: kamilml, heikelv
 Donate link: https://apisunat.com/
 Tags: WP, apisunat, facturacion, facturacion electronica, factura, boleta, WooCommerce, CPE, Peru
 Requires at least: 5.8
-Tested up to: 6.0.1
+Tested up to: 6.3.2
 Stable tag: 1.2.1
 Requires PHP: 7.4
 License: GPLv3 or later

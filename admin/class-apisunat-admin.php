@@ -488,13 +488,16 @@ class Apisunat_Admin
 
 			$orders_completed = wc_get_orders(
 				array(
-					'limit'  => 100,
+					'orderby' => 'id',
+					'order' => 'DESC',
+					'limit'  => 60,
 					'status' => 'wc-completed',
-					'date_query' => array(
-						array(
-							'after' => date('Y-m-d H:i:s', $fecha_limite), // Formatea la fecha límite.
-						),
-					),
+					// 'date_query' => array(
+					// 	array(
+					// 		'after' => date('Y-m-d H:i:s', $fecha_limite), // Formatea la fecha límite.
+					// 	),
+					// ),
+					'date_after'   => $fecha_limite,
 					'meta_key'     => 'apisunat_document_status',
 					'meta_compare' => 'NOT EXISTS',
 				)
