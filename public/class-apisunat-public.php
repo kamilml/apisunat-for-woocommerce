@@ -119,27 +119,27 @@ class Apisunat_Public {
 		$fields['billing_last_name']['required']  = false;
 
 		$fields['billing_apisunat_document_type'] = array(
-			'label'    => 'TIPO DE DOCUMENTO', // Add custom field label!
+			'label'    => 'Comprobante de Pago', // Add custom field label!
 			'required' => true, // if field is required or not!
 			'clear'    => true, // add clear or not!
 			'type'     => 'select', // add field type!
 			'class'    => array( 'form-row-wide' ), // add class name!
 			'options'  => array(
-				'01' => 'FACTURA',
 				'03' => 'BOLETA DE VENTA',
+				'01' => 'FACTURA',
 			),
 			'priority' => 21,
 		);
 
 		$fields['billing_apisunat_customer_id_type'] = array(
-			'label'    => 'TIPO DE IDENTIFICACIÓN', // Add custom field label!
+			'label'    => 'Tipo de Doc. identificación', // Add custom field label!
 			'required' => true, // if field is required or not!
 			'clear'    => true, // add clear or not!
 			'type'     => 'select', // add field type!
 			'class'    => array( 'form-row-wide' ), // add class name!
 			'options'  => array(
-				'6' => 'RUC',
 				'1' => 'DNI',
+				'6' => 'RUC',
 				'7' => 'PASAPORTE',
 				'B' => 'OTROS (Doc. Extranjero)',
 			),
@@ -147,7 +147,7 @@ class Apisunat_Public {
 		);
 
 		$fields['billing_apisunat_customer_id'] = array(
-			'label'       => 'Número del Documento',
+			'label'       => 'Número de Doc. identificación',
 			'required'    => true,
 			'class'       => array( 'form-row-wide' ),
 			'priority'    => 23,
