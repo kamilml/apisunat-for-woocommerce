@@ -111,7 +111,7 @@ class Apisunat_Admin
 				// fclose($file);
 				// return $bytes;
 
-				if(get_option('apisunat_logtail_token')){
+				if (get_option('apisunat_logtail_token')) {
 
 					$url = 'https://in.logs.betterstack.com';
 
@@ -126,7 +126,7 @@ class Apisunat_Admin
 						CURLOPT_CUSTOMREQUEST  => 'POST',
 						CURLOPT_HTTPHEADER     => array(
 							'Content-Type: application/json',
-							'Authorization: Bearer '. get_option('apisunat_logtail_token')
+							'Authorization: Bearer ' . get_option('apisunat_logtail_token')
 						),
 						CURLOPT_POSTFIELDS      => json_encode($data),
 						CURLOPT_SSL_VERIFYPEER => false, // Si deseas desactivar la verificación SSL
@@ -140,9 +140,6 @@ class Apisunat_Admin
 					}
 					curl_close($curl);
 				}
-
-				
-
 			}
 		}
 	}
@@ -155,7 +152,7 @@ class Apisunat_Admin
 			$fecha_actual = current_time('mysql');
 
 			if ('auto' === $new_value) {
-				plugin_log("Registro de fecha cambio a automatico: ". $fecha_actual);
+				plugin_log("Registro de fecha cambio a automatico: " . $fecha_actual);
 				update_option('apisunat_fecha', $fecha_actual);
 			}
 		}
@@ -478,8 +475,18 @@ class Apisunat_Admin
 	 */
 	public function apisunat_check_status_on_schedule(): void
 	{
+		$is_running = get_transient('apisunat_one_minute_event');
+
 
 		if (get_option('apisunat_forma_envio') === 'auto') {
+
+			if ($is_running) {
+				// El cron ya está en ejecución, no hagas nada.
+				return;
+			}
+
+			// Establecer el transitorio para bloquear la ejecución del cron
+			set_transient('apisunat_one_minute_event', true, 600); // 600 segundos (10 minutos)
 
 			if (!get_option('apisunat_fecha')) {
 				update_option('apisunat_fecha', current_time('mysql'));
@@ -506,12 +513,11 @@ class Apisunat_Admin
 			plugin_log($fecha_limite . ' FECHA LIMITE / Ejecutando apisunat_check_status_on_schedule ' . count($orders_completed) . ' órdenes');
 
 			foreach ($orders_completed as $order) {
-				plugin_log("orders_completed foreach: ". $order->get_id());
+				plugin_log("orders_completed foreach: " . $order->get_id());
 
 				if ($order->meta_exists('_billing_apisunat_meta_data_mapping')) {
-					plugin_log("send_apisunat_order: ". $order->get_id());
+					plugin_log("send_apisunat_order: " . $order->get_id());
 					$this->send_apisunat_order($order->get_id());
-					
 				}
 			}
 		}
@@ -535,6 +541,7 @@ class Apisunat_Admin
 				update_post_meta($order->get_id(), 'apisunat_document_status', $status);
 			}
 		}
+		delete_transient('apisunat_one_minute_event');
 	}
 
 	/**
