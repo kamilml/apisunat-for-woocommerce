@@ -529,8 +529,10 @@ class Apisunat_Admin
 				$data    = json_decode(wp_remote_retrieve_body($request), true);
 				$status  = $data['status'];
 
-				$order->add_order_note(' El documento se encuentra en estado: ' . $status);
-				update_post_meta($order->get_id(), 'apisunat_document_status', $status);
+				if ($status !== 'PENDIENTE') {
+					$order->add_order_note(' El documento se encuentra en estado: ' . $status);
+					update_post_meta($order->get_id(), 'apisunat_document_status', $status);
+				}
 			}
 		}
 		update_option('apisunat_cron_running', 'false');
