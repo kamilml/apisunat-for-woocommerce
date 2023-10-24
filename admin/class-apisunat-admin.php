@@ -284,13 +284,13 @@ class Apisunat_Admin
 		$customer_id      = $order->get_meta($temp['_billing_apisunat_customer_id']['key']);
 
 		$document_types = array(
-			$temp['_billing_apisunat_document_type']['value_01'] => 'FACTURA',
 			$temp['_billing_apisunat_document_type']['value_03'] => 'BOLETA DE VENTA',
+			$temp['_billing_apisunat_document_type']['value_01'] => 'FACTURA',
 		);
 
 		$customer_id_types = array(
-			$temp['_billing_apisunat_customer_id_type']['value_6'] => 'RUC',
 			$temp['_billing_apisunat_customer_id_type']['value_1'] => 'DNI',
+			$temp['_billing_apisunat_customer_id_type']['value_6'] => 'RUC',
 			$temp['_billing_apisunat_customer_id_type']['value_7'] => 'PASAPORTE',
 			$temp['_billing_apisunat_customer_id_type']['value_B'] => 'OTROS (Doc. Extranjero)',
 		);
@@ -304,7 +304,7 @@ class Apisunat_Admin
 						echo ' class="none_set"';
 					}
 					?>>
-					<strong>Tipo de Documento:</strong>
+					<strong>Tipo de CPE:</strong>
 					<?php echo $document_types[$document_type] ? esc_html($document_types[$document_type]) : 'No document type selected.'; ?>
 				</p>
 				<p <?php
@@ -312,7 +312,7 @@ class Apisunat_Admin
 						echo ' class="none_set"';
 					}
 					?>>
-					<strong>Tipo de Documento: </strong>
+					<strong>Tipo de Doc. del comprador: </strong>
 					<?php echo $customer_id_types[$customer_id_type] ? esc_html($customer_id_types[$customer_id_type]) : 'No customer id type selected.'; ?>
 
 				</p>
@@ -321,7 +321,7 @@ class Apisunat_Admin
 						echo ' class="none_set"';
 					}
 					?>>
-					<strong>Número de Documento:</strong>
+					<strong>Número de Doc. del comprador:</strong>
 					<?php echo $customer_id ? esc_html($customer_id) : 'No customer id'; ?>
 				</p>
 			</div>
@@ -331,7 +331,7 @@ class Apisunat_Admin
 			woocommerce_wp_select(
 				array(
 					'id'            => '_billing_apisunat_document_type',
-					'label'         => 'Tipo de Identificacion',
+					'label'         => 'Tipo de CPE',
 					'wrapper_class' => 'form-field-wide',
 					'value'         => $document_type,
 					'options'       => $document_types,
@@ -340,7 +340,7 @@ class Apisunat_Admin
 			woocommerce_wp_select(
 				array(
 					'id'            => '_billing_apisunat_customer_id_type',
-					'label'         => 'Tipo de Documento',
+					'label'         => 'Tipo de Doc. del comprador',
 					'wrapper_class' => 'form-field-wide',
 					'value'         => $customer_id_type,
 					'options'       => $customer_id_types,
@@ -349,7 +349,7 @@ class Apisunat_Admin
 			woocommerce_wp_text_input(
 				array(
 					'id'            => '_billing_apisunat_customer_id',
-					'label'         => 'Número de Documento:',
+					'label'         => 'Número de Doc. del comprador',
 					'value'         => $customer_id,
 					'wrapper_class' => 'form-field-wide',
 				)
@@ -971,7 +971,7 @@ class Apisunat_Admin
 				'section'  => 'apisunat_data_section',
 			),
 			array(
-				'title'    => 'Emitir CPE sin datos del comprador: ',
+				'title'    => 'Permitir CPE sin Documento del comprador: ',
 				'type'     => 'select',
 				'name'     => 'apisunat_no_doc',
 				'id'       => 'apisunat_no_doc',
@@ -1111,7 +1111,7 @@ class Apisunat_Admin
 				'section'  => 'apisunat_advanced_section',
 			),
 			array(
-				'title'       => 'key para Tipo de Comprobante: ',
+				'title'       => 'key para Tipo de CPE: ',
 				'type'        => 'input',
 				'name'        => 'apisunat_key_tipo_comprobante',
 				'id'          => 'apisunat_key_tipo_comprobante',
@@ -1144,7 +1144,7 @@ class Apisunat_Admin
 				'section'     => 'apisunat_advanced_section',
 			),
 			array(
-				'title'       => 'key para Tipo de Documento: ',
+				'title'       => 'key para Tipo de Documento del comprador: ',
 				'type'        => 'input',
 				'name'        => 'apisunat_key_tipo_documento',
 				'id'          => 'apisunat_key_tipo_documento',
@@ -1199,7 +1199,7 @@ class Apisunat_Admin
 				'section'     => 'apisunat_advanced_section',
 			),
 			array(
-				'title'       => 'key para Número de Documento: ',
+				'title'       => 'key para Número de Documento del comprador: ',
 				'type'        => 'input',
 				'name'        => 'apisunat_key_numero_documento',
 				'id'          => 'apisunat_key_numero_documento',
@@ -1276,7 +1276,7 @@ class Apisunat_Admin
 	public function apisunat_display_advanced(): void
 	{
 		echo '<hr>';
-		echo '<h3>Configuración</h3>';
+		echo '<h3>Avanzado</h3>';
 	}
 
 	/**
