@@ -36,6 +36,9 @@ class Apisunat_Activator {
 		if ( ! wp_next_scheduled( 'apisunat_one_minute_event' ) ) {
 			wp_schedule_event( time(), 'apisunat_every_one_minute', 'apisunat_one_minute_event' );
 		}
+
+		add_option('apisunat_cron_runnig');
+		update_option('apisunat_cron_runnig', 'false');
 	}
 }
 

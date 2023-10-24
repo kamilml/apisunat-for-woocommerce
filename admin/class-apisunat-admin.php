@@ -475,18 +475,10 @@ class Apisunat_Admin
 	 */
 	public function apisunat_check_status_on_schedule(): void
 	{
-		$is_running = get_transient('apisunat_one_minute_event');
+		
+		if (get_option('apisunat_forma_envio') === 'auto' && get_option('apisunat_cron_running') === 'false') {
 
-
-		if (get_option('apisunat_forma_envio') === 'auto') {
-
-			if ($is_running) {
-				// El cron ya está en ejecución, no hagas nada.
-				return;
-			}
-
-			// Establecer el transitorio para bloquear la ejecución del cron
-			set_transient('apisunat_one_minute_event', true, 600); // 600 segundos (10 minutos)
+			update_option('apisunat_cron_running', 'true');
 
 			if (!get_option('apisunat_fecha')) {
 				update_option('apisunat_fecha', current_time('mysql'));
@@ -541,7 +533,7 @@ class Apisunat_Admin
 				update_post_meta($order->get_id(), 'apisunat_document_status', $status);
 			}
 		}
-		delete_transient('apisunat_one_minute_event');
+		update_option('apisunat_cron_running', 'false');
 	}
 
 	/**
@@ -1259,11 +1251,20 @@ class Apisunat_Admin
 		echo '<hr>';
 		echo '<h3>Configuración</h3>';
 
+		$cron_runnig = get_option('apisunat_cron_runnig');
+		if ($cron_runnig) {
+			$text = $cron_runnig === 'true' ? "RUNNING" : "STOPPED";
+			echo '<small>CRON STATUS: ' . $text . '</small>';
+			echo '<br>';
+		}
+
 		$ultimo_cambio = get_option('apisunat_fecha');
 		if ($ultimo_cambio) {
 			$fecha_formateada = date('d/m/Y H:i:s', strtotime($ultimo_cambio));
 			echo '<small>El último cambio a automático se realizó el: ' . $fecha_formateada . '</small>';
 		}
+
+		
 	}
 
 	/**
