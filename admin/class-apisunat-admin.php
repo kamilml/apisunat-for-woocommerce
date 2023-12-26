@@ -478,63 +478,70 @@ class Apisunat_Admin
 	 */
 	public function apisunat_check_status_on_schedule(): void
 	{
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'semaphore';
+        $result = $wpdb->query($wpdb->prepare("UPDATE $table_name SET is_locked = TRUE WHERE id = 1 AND is_locked = FALSE"));
+        sleep ( rand ( 1, 5));
+        if ($result > 0) {
+            if (get_option('apisunat_forma_envio') === 'auto') {
 
-		if (get_option('apisunat_forma_envio') === 'auto') {
+                if (!get_option('apisunat_fecha')) {
+                    update_option('apisunat_fecha', current_time('mysql'));
+                }
 
-			if (!get_option('apisunat_fecha')) {
-				update_option('apisunat_fecha', current_time('mysql'));
-			}
+                $fecha_limite = get_option('apisunat_fecha');
 
-			$fecha_limite = get_option('apisunat_fecha');
+                $orders_completed = wc_get_orders(
+                    array(
+                        'orderby' => 'id',
+                        'order' => 'DESC',
+                        'limit' => 60,
+                        'status' => 'wc-completed',
+                        // 'date_query' => array(
+                        // 	array(
+                        // 		'after' => date('Y-m-d H:i:s', $fecha_limite), // Formatea la fecha límite.
+                        // 	),
+                        // ),
+                        'date_after' => $fecha_limite,
+                        'meta_key' => 'apisunat_document_status',
+                        'meta_compare' => 'NOT EXISTS',
+                    )
+                );
+                plugin_log($fecha_limite . ' FECHA LIMITE / Ejecutando apisunat_check_status_on_schedule ' . count($orders_completed) . ' órdenes');
 
-			$orders_completed = wc_get_orders(
-				array(
-					'orderby' => 'id',
-					'order' => 'DESC',
-					'limit'  => 60,
-					'status' => 'wc-completed',
-					// 'date_query' => array(
-					// 	array(
-					// 		'after' => date('Y-m-d H:i:s', $fecha_limite), // Formatea la fecha límite.
-					// 	),
-					// ),
-					'date_after'   => $fecha_limite,
-					'meta_key'     => 'apisunat_document_status',
-					'meta_compare' => 'NOT EXISTS',
-				)
-			);
-			plugin_log($fecha_limite . ' FECHA LIMITE / Ejecutando apisunat_check_status_on_schedule ' . count($orders_completed) . ' órdenes');
+                foreach ($orders_completed as $order) {
+                    plugin_log("orders_completed foreach: " . $order->get_id());
 
-			foreach ($orders_completed as $order) {
-				plugin_log("orders_completed foreach: ". $order->get_id());
+                    if ($order->meta_exists('_billing_apisunat_meta_data_mapping')) {
+                        plugin_log("send_apisunat_order: " . $order->get_id());
+                        $this->send_apisunat_order($order->get_id());
 
-				if ($order->meta_exists('_billing_apisunat_meta_data_mapping')) {
-					plugin_log("send_apisunat_order: ". $order->get_id());
-					$this->send_apisunat_order($order->get_id());
-					
-				}
-			}
-		}
+                    }
+                }
+            }
 
-		$orders = wc_get_orders(
-			array(
-				'limit'        => -1, // Query all orders.
-				'meta_key'     => 'apisunat_document_status', // The postmeta key field.
-				'meta_value'   => 'PENDIENTE', // The postmeta key field.
-				'meta_compare' => '=', // The comparison argument.
-			)
-		);
+            $orders = wc_get_orders(
+                array(
+                    'limit' => -1, // Query all orders.
+                    'meta_key' => 'apisunat_document_status', // The postmeta key field.
+                    'meta_value' => 'PENDIENTE', // The postmeta key field.
+                    'meta_compare' => '=', // The comparison argument.
+                )
+            );
 
-		foreach ($orders as $order) {
-			if ($order->meta_exists('apisunat_document_id') && $order->get_meta('apisunat_document_status') === 'PENDIENTE') {
-				$request = wp_remote_get(self::API_URL . '/documents/' . $order->get_meta('apisunat_document_id') . '/getById');
-				$data    = json_decode(wp_remote_retrieve_body($request), true);
-				$status  = $data['status'];
+            foreach ($orders as $order) {
+                if ($order->meta_exists('apisunat_document_id') && $order->get_meta('apisunat_document_status') === 'PENDIENTE') {
+                    $request = wp_remote_get(self::API_URL . '/documents/' . $order->get_meta('apisunat_document_id') . '/getById');
+                    $data = json_decode(wp_remote_retrieve_body($request), true);
+                    $status = $data['status'];
 
-				$order->add_order_note(' El documento se encuentra en estado: ' . $status);
-				update_post_meta($order->get_id(), 'apisunat_document_status', $status);
-			}
-		}
+                    $order->add_order_note(' El documento se encuentra en estado: ' . $status);
+                    update_post_meta($order->get_id(), 'apisunat_document_status', $status);
+                }
+            }
+
+            $wpdb->query($wpdb->prepare("UPDATE $table_name SET is_locked = FALSE WHERE id = 1"));
+        }
 	}
 
 	/**
