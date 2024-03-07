@@ -1052,6 +1052,19 @@ class Apisunat_Admin
 				'section'  => 'apisunat_data_section',
 			),
 			array(
+				'title'    => 'Factor IGV (solo para GRAVADO): ',
+				'type'     => 'select',
+				'name'     => 'apisunat_factor_tributo',
+				'id'       => 'apisunat_factor_tributo',
+				'required' => true,
+				'options'  => array(
+					'18' => '18',
+					'10' => '10',
+				),
+				'group'    => 'apisunat_general_settings',
+				'section'  => 'apisunat_data_section',
+			),
+			array(
 				'title'    => 'Facturar costo de envío: ',
 				'type'     => 'select',
 				'name'     => 'apisunat_shipping_cost',
@@ -1373,6 +1386,7 @@ class Apisunat_Admin
 		$send_data['plugin_data']['serie01']       = get_option('apisunat_serie_factura');
 		$send_data['plugin_data']['serie03']       = get_option('apisunat_serie_boleta');
 		$send_data['plugin_data']['affectation']   = get_option('apisunat_tipo_tributo');
+		$send_data['plugin_data']['affectation_factor']   = get_option('apisunat_factor_tributo');
 		$send_data['plugin_data']['issueTime']     = get_option('apisunat_include_time');
 		$send_data['plugin_data']['shipping_cost'] = get_option('apisunat_shipping_cost');
 
