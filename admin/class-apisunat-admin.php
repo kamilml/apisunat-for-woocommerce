@@ -475,10 +475,17 @@ class Apisunat_Admin
 	 */
 	public function apisunat_check_status_on_schedule(): void
 	{
+		plugin_log('Ejecutando apisunat_check_status_on_schedule 111');
         global $wpdb;
         $table_name = $wpdb->prefix . 'semaphore';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+            $sql = "CREATE TABLE $table_name (id INT PRIMARY KEY, is_locked BOOLEAN)";
+            $wpdb->query($sql);
+            $wpdb->insert($table_name, array('id' => 1, 'is_locked' => false));
+        }
         $result = $wpdb->query($wpdb->prepare("UPDATE $table_name SET is_locked = TRUE WHERE id = 1 AND is_locked = FALSE"));
         sleep ( rand ( 1, 5));
+		plugin_log('Ejecutando apisunat_check_status_on_schedule 222 / result: ' . $result);
 
         if ($result > 0) {
             if (get_option('apisunat_forma_envio') === 'auto') {
@@ -539,6 +546,8 @@ class Apisunat_Admin
             }
 
             $wpdb->query($wpdb->prepare("UPDATE $table_name SET is_locked = FALSE WHERE id = 1"));
+        } else {
+            $wpdb->query($wpdb->prepare("UPDATE $table_name SET is_locked = FALSE WHERE id = 1"));
         }
 	}
 
@@ -552,7 +561,7 @@ class Apisunat_Admin
 	{
 		if (get_option('apisunat_forma_envio') === 'auto') {
 			// add_action( 'woocommerce_order_status_completed', array( $this, 'send_apisunat_order' ), 10, 1 );
-			add_action('woocommerce_order_status_changed', array($this, 'apisunat_order_status_change'), 10, 3);
+			// add_action('woocommerce_order_status_changed', array($this, 'apisunat_order_status_change'), 10, 3); // TEMPORALMENTE COMENTADO
 		}
 		add_action('wp_ajax_send_apisunat_order', array($this, 'send_apisunat_order'), 10, 1);
 	}
