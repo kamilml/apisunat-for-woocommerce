@@ -10,9 +10,6 @@ class OrderMetaBox {
     public static function register(): void {
         add_action('add_meta_boxes_shop_order',                       [self::class, 'metaBox']);
         add_action('add_meta_boxes_woocommerce_page_wc-orders',       [self::class, 'metaBox']);
-        add_action('add_meta_boxes_shop_order',                       [self::class, 'detraccionMetaBox']);
-        add_action('add_meta_boxes_woocommerce_page_wc-orders',       [self::class, 'detraccionMetaBox']);
-
         add_action('woocommerce_admin_order_data_after_billing_address', [self::class, 'billingMeta']);
         add_action('woocommerce_process_shop_order_meta',                [self::class, 'saveOrderMeta']);
     }
@@ -20,7 +17,7 @@ class OrderMetaBox {
     public static function metaBox(): void {
         add_meta_box(
             'sunat_cpe_meta',
-            __('API Sunat', 'apisunatv2'),
+            __('APISUNAT', 'apisunatv2'),
             [self::class, 'render'],
             null,
             'side',
@@ -28,18 +25,7 @@ class OrderMetaBox {
         );
     }
 
-    public static function detraccionMetaBox(): void {
-        add_meta_box(
-            'sunat_detraccion_meta',
-            __('Detracción SUNAT', 'apisunatv2'),
-            [self::class, 'renderDetraccion'],
-            null,
-            'side',
-            'default'
-        );
-    }
-
-    public static function renderDetraccion($object): void {
+    public static function renderDetraction($object): void {
         if (is_object($object) && method_exists($object, 'get_id')) {
             $order_id = (int) $object->get_id();
         } elseif (is_object($object) && isset($object->ID)) {
@@ -52,63 +38,95 @@ class OrderMetaBox {
             return;
         }
 
-        $enabled         = (string) $order->get_meta('_billing_apisunat_detraccion_enabled') === '1';
-        $tipo_de_detraccion = (string) ($order->get_meta('_billing_apisunat_detraccion_tipo') ?: Options::getValue('detraccion.tipo_de_detraccion', ''));
-        $porcentaje      = (string) ($order->get_meta('_billing_apisunat_detraccion_porcentaje') ?: Options::getValue('detraccion.porcentaje', 12));
-        $medio_de_pago   = (string) ($order->get_meta('_billing_apisunat_detraccion_medio_de_pago') ?: Options::getValue('detraccion.medio_de_pago', '001'));
-        $cuenta_banco    = (string) ($order->get_meta('_billing_apisunat_detraccion_cuenta_banco') ?: Options::getValue('detraccion.cuenta_bancaria', ''));
+        $branchDetraction = [];
+        $branchKey = Options::getValue('settings.multi_branch_key', '');
+        if ($branchKey !== '') {
+            $branchId = (string) $order->get_meta($branchKey);
+            if ($branchId !== '') {
+                $branch = Options::getBranch($branchId);
+                if ($branch !== null && isset($branch['detraction'])) {
+                    $branchDetraction = $branch['detraction'];
+                }
+            }
+        }
+        $branchDetraction = $branchDetraction + (array) Options::getValue('detraction', []);
 
-        $tipos_de_detraccion = Catalogs::tiposDeDetraccion();
+        $enabled         = (string) $order->get_meta('_billing_apisunat_detraction_enabled') === '1';
+        $detraction_type = (string) ($order->get_meta('_billing_apisunat_detraction_tipo') ?: ($branchDetraction['detraction_type'] ?? ''));
+        $percentage      = (string) ($order->get_meta('_billing_apisunat_detraction_percentage') ?: ($branchDetraction['percentage'] ?? 12));
+        $payment_method   = (string) ($order->get_meta('_billing_apisunat_detraction_payment_method') ?: ($branchDetraction['payment_method'] ?? '001'));
+        $cuenta_banco    = (string) ($order->get_meta('_billing_apisunat_detraction_cuenta_banco') ?: ($branchDetraction['bank_account'] ?? ''));
+        $monto_total     = $order->get_meta('_billing_apisunat_detraction_monto_total');
+        $order_total     = (float) $order->get_total();
+        $monto_default   = $order_total > 0 && $percentage > 0 ? round($order_total * (float) $percentage / 100, 2) : 0;
+        $monto_total     = $monto_total !== '' ? (string) $monto_total : (string) $monto_default;
+
+        $tipos_de_detraction = Catalogs::tiposDeDetraction();
         $medios_de_pago      = Catalogs::mediosDePago();
         ?>
         <p class="form-field form-field-wide">
-            <label for="_billing_apisunat_detraccion_enabled">
-                <input type="checkbox" id="_billing_apisunat_detraccion_enabled" name="_billing_apisunat_detraccion_enabled" value="1" <?php checked($enabled, true); ?>>
-                <?= esc_html__('Aplicar detracción manual', 'apisunatv2') ?>
+            <label for="_billing_apisunat_detraction_enabled">
+                <input type="checkbox" id="_billing_apisunat_detraction_enabled" name="_billing_apisunat_detraction_enabled" value="1" <?php checked($enabled, true); ?>>
+                <?= esc_html__('Aplicar Detracción', 'apisunatv2') ?>
             </label>
         </p>
-        <div id="sunat_detraccion_fields" style="<?= $enabled ? '' : 'display:none;' ?>">
+        <div id="sunat_detraction_fields" style="<?= $enabled ? '' : 'display:none;' ?>">
             <p class="form-field form-field-wide">
-                <label for="_billing_apisunat_detraccion_tipo"><?= esc_html__('Tipo de detracción', 'apisunatv2') ?></label>
-                <select id="_billing_apisunat_detraccion_tipo" name="_billing_apisunat_detraccion_tipo">
-                    <?php foreach ($tipos_de_detraccion as $k => $v): ?>
-                        <option value="<?= esc_attr($k) ?>" <?= selected($tipo_de_detraccion, $k, false) ?> data-percent="<?= esc_attr($v['percent'] ?? '') ?>"><?= esc_html($v['label']) ?></option>
+                <label for="_billing_apisunat_detraction_tipo"><?= esc_html__('Tipo de detracción', 'apisunatv2') ?></label>
+                <select id="_billing_apisunat_detraction_tipo" name="_billing_apisunat_detraction_tipo">
+                    <?php foreach ($tipos_de_detraction as $k => $v): ?>
+                        <option value="<?= esc_attr($k) ?>" <?= selected($detraction_type, $k, false) ?> data-percent="<?= esc_attr($v['percent'] ?? '') ?>"><?= esc_html($v['label']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </p>
             <p class="form-field form-field-wide">
-                <label for="_billing_apisunat_detraccion_medio_de_pago"><?= esc_html__('Medio de pago', 'apisunatv2') ?></label>
-                <select id="_billing_apisunat_detraccion_medio_de_pago" name="_billing_apisunat_detraccion_medio_de_pago">
+                <label for="_billing_apisunat_detraction_payment_method"><?= esc_html__('Medio de pago', 'apisunatv2') ?></label>
+                <select id="_billing_apisunat_detraction_payment_method" name="_billing_apisunat_detraction_payment_method">
                     <?php foreach ($medios_de_pago as $k => $v): ?>
-                        <option value="<?= esc_attr($k) ?>" <?= selected($medio_de_pago, $k, false) ?>><?= esc_html($v) ?></option>
+                        <option value="<?= esc_attr($k) ?>" <?= selected($payment_method, $k, false) ?>><?= esc_html($v) ?></option>
                     <?php endforeach; ?>
                 </select>
             </p>
             <p class="form-field form-field-wide">
-                <label for="_billing_apisunat_detraccion_porcentaje"><?= esc_html__('% Detracción', 'apisunatv2') ?></label>
-                <input type="number" id="_billing_apisunat_detraccion_porcentaje" name="_billing_apisunat_detraccion_porcentaje" value="<?= esc_attr($porcentaje) ?>" step="0.01" min="0" max="100">
+                <label for="_billing_apisunat_detraction_percentage"><?= esc_html__('% Detracción', 'apisunatv2') ?></label>
+                <input type="number" id="_billing_apisunat_detraction_percentage" name="_billing_apisunat_detraction_percentage" value="<?= esc_attr($percentage) ?>" step="0.01" min="0" max="100">
             </p>
             <p class="form-field form-field-wide">
-                <label for="_billing_apisunat_detraccion_cuenta_banco"><?= esc_html__('Cuenta bancaria', 'apisunatv2') ?></label>
-                <input type="text" id="_billing_apisunat_detraccion_cuenta_banco" name="_billing_apisunat_detraccion_cuenta_banco" value="<?= esc_attr($cuenta_banco) ?>" placeholder="<?= esc_attr__('00-000-000000', 'apisunatv2') ?>">
+                <label for="_billing_apisunat_detraction_cuenta_banco"><?= esc_html__('Cuenta bancaria', 'apisunatv2') ?></label>
+                <input type="text" id="_billing_apisunat_detraction_cuenta_banco" name="_billing_apisunat_detraction_cuenta_banco" value="<?= esc_attr($cuenta_banco) ?>" placeholder="<?= esc_attr__('00-000-000000', 'apisunatv2') ?>">
+            </p>
+            <p class="form-field form-field-wide">
+                <label for="_billing_apisunat_detraction_monto_total"><?= esc_html__('Monto total', 'apisunatv2') ?></label>
+                <input type="number" id="_billing_apisunat_detraction_monto_total" name="_billing_apisunat_detraction_monto_total" value="<?= esc_attr($monto_total) ?>" step="0.01" min="0">
             </p>
         </div>
         <script>
         (function() {
-            var checkbox = document.getElementById('_billing_apisunat_detraccion_enabled');
-            var fields = document.getElementById('sunat_detraccion_fields');
+            var checkbox = document.getElementById('_billing_apisunat_detraction_enabled');
+            var fields = document.getElementById('sunat_detraction_fields');
             if (checkbox && fields) {
                 checkbox.addEventListener('change', function() {
                     fields.style.display = this.checked ? '' : 'none';
                 });
             }
-            var tipo = document.getElementById('_billing_apisunat_detraccion_tipo');
-            var pct = document.getElementById('_billing_apisunat_detraccion_porcentaje');
+            var tipo = document.getElementById('_billing_apisunat_detraction_tipo');
+            var pct = document.getElementById('_billing_apisunat_detraction_percentage');
+            var monto = document.getElementById('_billing_apisunat_detraction_monto_total');
             if (tipo && pct) {
                 tipo.addEventListener('change', function() {
                     var opt = this.options[this.selectedIndex];
                     if (opt && opt.dataset.percent) {
                         pct.value = opt.dataset.percent;
+                        pct.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+            if (pct && monto) {
+                pct.addEventListener('change', function() {
+                    if (monto.value === '' || parseFloat(monto.value) === 0) {
+                        var total = <?= (float) $order_total ?>;
+                        var pctVal = parseFloat(this.value) || 0;
+                        monto.value = total > 0 && pctVal > 0 ? (total * pctVal / 100).toFixed(2) : '';
                     }
                 });
             }
@@ -154,6 +172,12 @@ class OrderMetaBox {
             );
         }
 
+        echo '<hr style="border-top:1px solid #ddd; margin:12px 0;">';
+
+        self::renderDetraction($object);
+
+        echo '<hr style="border-top:1px solid #ddd; margin:12px 0;">';
+
         if ($status === '' || in_array($status, ['ERROR', 'EXCEPCION'], true)) {
             self::emitBtn($order_id, $order->get_status());
         }
@@ -166,10 +190,19 @@ class OrderMetaBox {
 
         $cpeOptions = ['03' => __('Boleta', 'apisunatv2'), '01' => __('Factura', 'apisunatv2')];
         $idOptions  = [
+            '-' => __('Sin documento', 'apisunatv2'),
             '1' => __('DNI', 'apisunatv2'),
             '6' => __('RUC', 'apisunatv2'),
+            'H' => __('CPP - Carné Temporal de Permanencia', 'apisunatv2'),
             '7' => __('Pasaporte', 'apisunatv2'),
-            'B' => __('Otro', 'apisunatv2'),
+            '4' => __('Carnet de extranjería', 'apisunatv2'),
+            'E' => __('TAM - Tarjeta Andina de Migración', 'apisunatv2'),
+            'A' => __('Cédula Diplomática', 'apisunatv2'),
+            'G' => __('Salvoconducto', 'apisunatv2'),
+            'C' => __('TIN - Tax Identification Number', 'apisunatv2'),
+            'D' => __('IN - Identification Number', 'apisunatv2'),
+            'B' => __('ID. PERS. NAT. (no domiciliado)', 'apisunatv2'),
+            '0' => __('DOC. TRIB. (no domiciliado)', 'apisunatv2'),
         ];
         ?>
         <div class="order_sunat_fields">
@@ -212,18 +245,21 @@ class OrderMetaBox {
             }
         }
 
-        $order->update_meta_data('_billing_apisunat_detraccion_enabled', isset($_POST['_billing_apisunat_detraccion_enabled']) ? '1' : '0');
-        if (isset($_POST['_billing_apisunat_detraccion_medio_de_pago'])) {
-            $order->update_meta_data('_billing_apisunat_detraccion_medio_de_pago', sanitize_text_field(wp_unslash($_POST['_billing_apisunat_detraccion_medio_de_pago'])));
+        $order->update_meta_data('_billing_apisunat_detraction_enabled', isset($_POST['_billing_apisunat_detraction_enabled']) ? '1' : '0');
+        if (isset($_POST['_billing_apisunat_detraction_payment_method'])) {
+            $order->update_meta_data('_billing_apisunat_detraction_payment_method', sanitize_text_field(wp_unslash($_POST['_billing_apisunat_detraction_payment_method'])));
         }
-        if (isset($_POST['_billing_apisunat_detraccion_porcentaje'])) {
-            $order->update_meta_data('_billing_apisunat_detraccion_porcentaje', sanitize_text_field(wp_unslash($_POST['_billing_apisunat_detraccion_porcentaje'])));
+        if (isset($_POST['_billing_apisunat_detraction_percentage'])) {
+            $order->update_meta_data('_billing_apisunat_detraction_percentage', sanitize_text_field(wp_unslash($_POST['_billing_apisunat_detraction_percentage'])));
         }
-        if (isset($_POST['_billing_apisunat_detraccion_tipo'])) {
-            $order->update_meta_data('_billing_apisunat_detraccion_tipo', sanitize_text_field(wp_unslash($_POST['_billing_apisunat_detraccion_tipo'])));
+        if (isset($_POST['_billing_apisunat_detraction_tipo'])) {
+            $order->update_meta_data('_billing_apisunat_detraction_tipo', sanitize_text_field(wp_unslash($_POST['_billing_apisunat_detraction_tipo'])));
         }
-        if (isset($_POST['_billing_apisunat_detraccion_cuenta_banco'])) {
-            $order->update_meta_data('_billing_apisunat_detraccion_cuenta_banco', sanitize_text_field(wp_unslash($_POST['_billing_apisunat_detraccion_cuenta_banco'])));
+        if (isset($_POST['_billing_apisunat_detraction_cuenta_banco'])) {
+            $order->update_meta_data('_billing_apisunat_detraction_cuenta_banco', sanitize_text_field(wp_unslash($_POST['_billing_apisunat_detraction_cuenta_banco'])));
+        }
+        if (isset($_POST['_billing_apisunat_detraction_monto_total'])) {
+            $order->update_meta_data('_billing_apisunat_detraction_monto_total', sanitize_text_field(wp_unslash($_POST['_billing_apisunat_detraction_monto_total'])));
         }
 
         $order->save();
@@ -256,7 +292,7 @@ class OrderMetaBox {
     }
 
     private static function emitBtn(int $order_id, string $status): void {
-        $estado_config = \Atm\Apisunatwp\Config\Options::getValue('emision.estado_emision', 'wc-completed');
+        $estado_config = \Atm\Apisunatwp\Config\Options::getValue('issue.trigger_status', 'wc-completed');
         $estado_actual = 'wc-' . $status;
         $disabled = $estado_actual === $estado_config ? '' : 'disabled';
         printf(
